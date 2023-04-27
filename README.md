@@ -2,6 +2,10 @@
 Remake of Legions: Overdrive in Unity
 
 ## How to run
+### Just run the damn game
+Go to the latest release found [here](https://github.com/ArtimosPenguidor/legions-uncapped/releases) and download the zip file. Extract it and run the executable.
+
+### Run in Unity
 1. Install Unity Hub [here](https://unity.com/download).
 2. Open Unity Hub, go to `Installs` and click `Install Editor`. Select Version `2020.3.26f1`.
 3. Clone this repo, or download the zip and extract it.
