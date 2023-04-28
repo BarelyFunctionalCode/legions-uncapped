@@ -213,7 +213,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29aa419a3ed14f4698e76083783efd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravity: 55
 --- !u!4 &451346374
 Transform:
   m_ObjectHideFlags: 0
@@ -302,7 +301,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 878544765}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 3c46edcb0e00fb14d9c600ca066c4007, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -804,6 +803,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: 3451118302482216456, guid: 5dbca144a0df78e4f92168993ea04705, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: 3c46edcb0e00fb14d9c600ca066c4007, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5dbca144a0df78e4f92168993ea04705, type: 3}
 --- !u!1001 &1747192697
@@ -897,7 +900,7 @@ Rigidbody:
   m_GameObject: {fileID: 1824321933}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.004
   m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -993,10 +996,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9f574dfb2ec74fb2ffe3398f86b42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 20
-  skiSpeed: 45
-  upJetForce: 100
-  downJetForce: 100
   rotationSpeed: 20
   rotationLimit: 20
   skiMaterial: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
