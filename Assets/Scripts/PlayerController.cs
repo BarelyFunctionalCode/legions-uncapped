@@ -175,6 +175,46 @@ public class PlayerController : MonoBehaviour
     /* IMPORTANT VALUES
 
     BASE PLAYER:
+
+    drag = 0.004;                         <----- Drag for running or jetting above 10 meters
+    airCushionDrag = 0.00275;             <----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
+    airCushionHeight = 10.0;              <----- this is probably the height at which the airCushionDrag stops being applied
+
+    // jet acceleration resistance        <----- No idea what these values are
+    horizontalJetResistance = 0.0017;
+    horizontalJetResistanceFactor = 1.8;
+    verticalJetResistance = 0.0006;
+    verticalJetResistanceFactor = 1.8;
+    overdriveJetResistance = 0.00012;
+    overdriveJetResistanceFactor = 1.95;
+
+    // directional jetting in air
+    // all air movement(up, down, directional)
+    jetAirMoveMinSpeed = 5;
+    jetAirMoveMaxSpeed = 1000;
+    jetAirMoveMaxAccelFactor = 1.5;      <---- ????
+
+    // Jet-Skating
+    // cardinal directional
+    jetSkateMinSpeed = 10;
+    jetSkateMaxSpeed = 1000;
+    jetSkateMaxAccelFactor = 3;         <---- ????
+
+    // Air control
+    useDirectionalAirControl = false;        // uhhhhhh
+    directionalAirControlK = 32; 
+    directionalAirControlForce = 275;
+    
+    // air control
+    airControl = 1.0;
+
+
+
+
+
+
+
+
     // camera
     cameraMaxDist = 4.5;          // third person camera distance
     cameraMinDist = 0.2;          // closest the camera can be in third person
@@ -185,25 +225,12 @@ public class PlayerController : MonoBehaviour
     maxLookAngle = 1.57;          // highest look angle (radians)
     maxFreelookAngle = 0;         // field of view angle when free looking (radians)
 
-
     takesFallingDamage = true; // this is a dynamic field
     fallDamageScale = 0.55; //0.53;
     fallDamageCurve = 2.7; //2.65; 
     fallDamageZBias = 0.6; //0.7;
     fallDamageMinSpeed = 50;
     fallDamageBBMultiplier = 0.8;
-
-    drag = 0.004;                         <----- Drag for running or jetting above 10 meters
-    airCushionDrag = 0.00275;             <----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
-    airCushionHeight = 10.0;
-
-    // jet acceleration resistance        <----- More drag values?
-    horizontalJetResistance = 0.0017;
-    horizontalJetResistanceFactor = 1.8;
-    verticalJetResistance = 0.0006;
-    verticalJetResistanceFactor = 1.8;
-    overdriveJetResistance = 0.00012;
-    overdriveJetResistanceFactor = 1.95;
 
     // healing
     autohealRate = 6.25;
@@ -236,40 +263,9 @@ public class PlayerController : MonoBehaviour
     maxEnergy = 40;               // amount of energy
     rechargeRate = 6.875;           // energy recharge rate
     groundRechargeRate = 12.5;      // on-ground recharge rate (ADDITIVE WITH RECHARGERATE!!)
-
-    // Air control
-    useDirectionalAirControl = false;
-    directionalAirControlK = 32;
-    directionalAirControlForce = 275;
-
-    // directional jetting in air
-    // all air movement(up, down, directional)
-    jetAirMoveEnergyDrain = 0.0;
-    jetAirMoveMinEnergy = 0;
-    jetAirMoveMinSpeed = 5;
-    jetAirMoveMaxSpeed = 1000;
-    jetAirMoveMaxAccelFactor = 1.5;
-    // up
-    jetUpForceZ = 7656.25;
     jetUpEnergyDrain = 22.5;
-    jetUpMinEnergy = 0.001;
-    // down
-    jetDownForceZ = 5625;
     jetDownEnergyDrain = 21.875;
-    jetDownMinEnergy = 0.001;
-    // cardinal directional
-    jetDirectionalForceXY = 3125;
-    jetDirectionalEnergyDrain = 0;
-    jetDirectionalMinEnergy = 0;
-
-    // Jet-Skating
-    // cardinal directional
-    jetSkateForceXY = 3125;
     jetSkateEnergyDrain = 4.6875;
-    jetSkateMinEnergy = 0;
-    jetSkateMinSpeed = 10;
-    jetSkateMaxSpeed = 1000;
-    jetSkateMaxAccelFactor = 3;
 
     // Overdrive
     overdriveSpeedZBias = 0.3;
@@ -293,9 +289,6 @@ public class PlayerController : MonoBehaviour
     overdriveExplosionRadius = 15;
     overdriveExplosionInnerRadius = 5;
     areaImpulse = 0;
-
-    // air control
-    airControl = 1.0;
 
     // spawning
     respawnTimeout = 4000;
