@@ -1,52 +1,9 @@
 fileFormatVersion: 2
-guid: 363012027b6cfd346b73a3ecb963412a
+guid: fcee76b159e274b479bf0d14e5dbb0c8
 ModelImporter:
   serializedVersion: 20200
-  internalIDToNameTable:
-  - first:
-      74: -4387482430644714418
-    second: tower|towerAction
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: LIGHTGLOW2.002
-    second: {fileID: 2100000, guid: 373a2b9a3a17bda488f2df54a110cf11, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: MET2_DIF.002
-    second: {fileID: 2100000, guid: 2755b6f7e2d1c934ab64a02e8a3226d7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: MET4_DIF.002
-    second: {fileID: 2100000, guid: 655823eea4ab50340a8a7dabf21a042f, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: STONE16B_D.002
-    second: {fileID: 2100000, guid: 617827c5b8a20c2408bb649fa764ecf8, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: STONE3B_D.002
-    second: {fileID: 2100000, guid: 14eb9506fe9ca0f44a51921c5209b088, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: STONE3D_D.002
-    second: {fileID: 2100000, guid: 29ceb62ef3a6c2f449303bac37d998dc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: STONLOD6_D.001
-    second: {fileID: 2100000, guid: 1bb8be0c8ff06ef4daa70a1018cd8796, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: ST_MAT_DARKDIRT.002
-    second: {fileID: 2100000, guid: 4ff1866f6396a6a41bc2e264b09d71df, type: 2}
+  internalIDToNameTable: []
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -79,7 +36,7 @@ ModelImporter:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
-    addColliders: 0
+    addColliders: 1
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
     importVisibility: 1
