@@ -1,7 +1,8 @@
 on:
   push:
-    branches:
-    - ev88
+    branches-ignore:
+      - main
+      - release
 
 jobs:
   pull-request:
