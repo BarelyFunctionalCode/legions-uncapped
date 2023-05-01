@@ -35,7 +35,14 @@ public class PlayerController : MonoBehaviour
 
     private PlayerControls playerControls;
     private Rigidbody rb;
-    private CapsuleCollider playerCollider;
+    private BoxCollider playerCollider;
+
+    private Vector3 lastVelocity = Vector3.zero;
+    private List<ContactPoint> contactPoints = new List<ContactPoint>();
+
+    private float maxStepHeight = 0.5f;        // The maximum a player can set upwards in units when they hit a wall that's potentially a step
+    private float stepSearchOvershoot = 0.01f; // How much to overshoot into the direction a potential step in units when testing. High values prevent player from walking up tiny steps but may cause problems.
+
 
 
     void Awake()
@@ -43,7 +50,7 @@ public class PlayerController : MonoBehaviour
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody>();
         rb.mass = mass;
-        playerCollider = GetComponent<CapsuleCollider>();
+        playerCollider = GetComponent<BoxCollider>();
         playerCollider.material = normalMaterial;
     }
 
@@ -55,6 +62,8 @@ public class PlayerController : MonoBehaviour
     {
         HandleMovement();
         HandleRotation();
+        contactPoints.Clear();
+        lastVelocity = rb.velocity;
     }
 
     private void HandleMovement()
@@ -72,10 +81,27 @@ public class PlayerController : MonoBehaviour
         if (!isMoving && !isSkiing) return;
 
         // Get normal of ground below player
+        // TODO: Use Contact Points to get ground data
         RaycastHit hit;
-        bool didHit = Physics.Raycast(new Ray(transform.position + (Vector3.down * (playerCollider.height/2f)), Vector3.down), out hit, 2f);
+        bool didHit = Physics.Raycast(new Ray(transform.position + (Vector3.down * (playerCollider.size.y/2f)), Vector3.down), out hit, 2f);
         Vector3 groundNormal = didHit ? hit.normal : Vector3.up;
+        Vector3 groundPoint = didHit ? hit.point : Vector3.zero;
         bool isGrounded = didHit && hit.distance < 1f;
+
+        // Check if the player runs into a step
+        if (isGrounded)
+        {
+            foreach (ContactPoint cp in contactPoints)
+            {
+                Vector3? stepUpOffset = ResolveStepUp(cp, groundPoint);
+                if (stepUpOffset != null)
+                {
+                    rb.position += (Vector3)stepUpOffset;
+                    rb.velocity = lastVelocity;
+                    break;
+                }
+            }
+        }
 
         // Get direction of movement relative to player rotation
         Vector3 movementDirection = transform.TransformDirection(movement).normalized;
@@ -138,6 +164,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private Vector3? ResolveStepUp(ContactPoint stepTestCP, Vector3 groundPoint)
+    {
+        // Check if contact point it potentially a step
+        if (Mathf.Abs(stepTestCP.normal.y) >= 0.01f) return null;
+        if (stepTestCP.point.y - groundPoint.y >= maxStepHeight) return null;
+        
+        // Use raycast to check height and depth of step
+        RaycastHit hitInfo;
+        Collider stepCol = stepTestCP.otherCollider;
+        float stepHeight = groundPoint.y + maxStepHeight;
+        Vector3 stepTestInvDir = new Vector3(-stepTestCP.normal.x, 0, -stepTestCP.normal.z).normalized;
+        Vector3 origin = new Vector3(stepTestCP.point.x, stepHeight, stepTestCP.point.z) + 
+                                    (stepTestInvDir * stepSearchOvershoot);
+        if (!stepCol.Raycast(new Ray(origin, Vector3.down), out hitInfo, maxStepHeight)) return null;
+        
+        // Valid step, calculate offset to move player up
+        Vector3 stepUpPoint = new Vector3(stepTestCP.point.x, hitInfo.point.y, stepTestCP.point.z) + (stepTestInvDir * stepSearchOvershoot);
+        return stepUpPoint - new Vector3(stepTestCP.point.x, groundPoint.y, stepTestCP.point.z);
+    }
+
     private Vector3 ApplyJetVelocityComponentLimit(
                                         Vector3 desiredVelocity,
                                         float currentVelocityComponentMagnitude,
@@ -161,7 +207,7 @@ public class PlayerController : MonoBehaviour
         return desiredVelocity;
     }
 
-  private void HandleRotation()
+    private void HandleRotation()
     {
         Vector2 rotationInput = playerControls.Movement.LookVector.ReadValue<Vector2>();
         Vector3 rotation = new Vector3(0f, rotationInput.x, 0f);
@@ -169,6 +215,15 @@ public class PlayerController : MonoBehaviour
         rotation *= rotationSpeed * Time.fixedDeltaTime;
         rotation = Vector3.ClampMagnitude(rotation, rotationLimit);
         transform.Rotate(rotation);
+    }
+
+    void OnCollisionEnter(Collision col)
+    {
+        contactPoints.AddRange(col.contacts);
+    }
+    void OnCollisionStay(Collision col)
+    {
+        contactPoints.AddRange(col.contacts);
     }
 }
 
