@@ -4,26 +4,54 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private float drag = 0.004f;                         //<----- Drag for running or jetting above 10 meters
+    private float airCushionDrag = 0.00275f;             //<----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
+    private float airCushionHeight = 10.0f;              //<----- this is probably the height at which the airCushionDrag stops being applied
+
+    private float horizontalJetResistance = 0.0017f;
+    private float horizontalJetResistanceFactor = 1.8f;
+    private float verticalJetResistance = 0.0006f;
+    private float verticalJetResistanceFactor = 1.8f;
+
     private float runForce = 10000f;
     private float maxRunForwardSpeed = 20f;
     private float maxRunBackwardSpeed = 20f;
     private float maxRunSideSpeed = 20f;
     private float maxRunUpSurfaceAngle = 50f; 
 
+    // Forces used while jetting/skiing
     private float horizontalJetForce = 3125f;
-    private float horizontalJetResistFactor = 0.3f;
-    private float horizontalJetResistSpeed = 100f;              // <---- I think this means that "at this speed, the player will be slowed down by the horizResistFactor"
-    private float horizontalJetMaxSpeed = 120f;
-
     private float upJetForce = 7031.25f;
-    private float upJetResistFactor = 0.3f;
-    private float upJetResistSpeed = 85f;                  // <---- Same as above
-    private float upJetMaxSpeed = 115f;
-
     private float downJetForce = 5156.25f;
-    private float downJetResistFactor = 0.1f;
-    private float downJetResistSpeed = 1000f;
-    private float downJetMaxSpeed = 1000f;                  //<---- Max speeds for each direction (velocity magnitude)
+
+    // Final Speed Caps
+    private float horizontalResistFactor = 0.3f;
+    private float horizontalResistSpeed = 100f;              // <---- I think this means that "at this speed, the player will be slowed down by the horizResistFactor"
+    private float horizontalMaxSpeed = 120f;
+    private float upResistFactor = 0.3f;
+    private float upResistSpeed = 85f;                  // <---- Same as above
+    private float upMaxSpeed = 115f;
+    private float downResistFactor = 0.1f;
+    private float downResistSpeed = 1000f;
+    private float downMaxSpeed = 1000f;                  //<---- Max speeds for each direction (velocity magnitude)
+
+    // Acceleration multipliers based on current speed
+    private float jetAirMoveMinSpeed = 5;
+    private float jetAirMoveMaxSpeed = 1000;
+    private float jetAirMoveMaxAccelFactor = 1.5f;
+
+    private float jetSkateMinSpeed = 10;
+    private float jetSkateMaxSpeed = 1000;
+    private float jetSkateMaxAccelFactor = 3;
+
+
+    // Air control
+    // private bool useDirectionalAirControl = false;        // uhhhhhh
+    private float directionalAirControlK = 32f; 
+    private float directionalAirControlForce = 275f;
+    
+    // air control
+    // private float airControl = 1.0f;
 
     private float mass = 75f;
 
@@ -35,14 +63,15 @@ public class PlayerController : MonoBehaviour
 
     private PlayerControls playerControls;
     private Rigidbody rb;
-    private BoxCollider playerCollider;
+    private CapsuleCollider playerCollider;
 
     private Vector3 lastVelocity = Vector3.zero;
+    private Vector3 lastPosition = Vector3.zero;
+    private Vector3 lastKnownGroundedPoint = Vector3.zero;
     private List<ContactPoint> contactPoints = new List<ContactPoint>();
 
-    private float maxStepHeight = 0.5f;        // The maximum a player can set upwards in units when they hit a wall that's potentially a step
-    private float stepSearchOvershoot = 0.01f; // How much to overshoot into the direction a potential step in units when testing. High values prevent player from walking up tiny steps but may cause problems.
-
+    private float maxStepHeight = 0.4f;        // The maximum a player can set upwards in units when they hit a wall that's potentially a step
+    private float stepSearchOvershoot = 0.005f; // How much to overshoot into the direction a potential step in units when testing. High values prevent player from walking up tiny steps but may cause problems.
 
 
     void Awake()
@@ -50,7 +79,7 @@ public class PlayerController : MonoBehaviour
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody>();
         rb.mass = mass;
-        playerCollider = GetComponent<BoxCollider>();
+        playerCollider = GetComponent<CapsuleCollider>();
         playerCollider.material = normalMaterial;
     }
 
@@ -64,6 +93,7 @@ public class PlayerController : MonoBehaviour
         HandleRotation();
         contactPoints.Clear();
         lastVelocity = rb.velocity;
+        lastPosition = transform.position;
     }
 
     private void HandleMovement()
@@ -71,76 +101,145 @@ public class PlayerController : MonoBehaviour
         // Get movement input
         Vector2 movementInput = playerControls.Movement.MoveVector.ReadValue<Vector2>();
         Vector3 movement = new Vector3(movementInput.x, 0f, movementInput.y);
+        // Get direction of movement relative to player rotation
+        Vector3 movementDirection = transform.TransformDirection(movement).normalized;
+    
+        // Get input for skiing, jumping, and down jetting
         bool isMoving = movement.magnitude > 0.0f;
         bool isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f;
         bool isJumping = playerControls.Movement.Jump.ReadValue<float>() > 0.0f;
         bool isJetting = isSkiing && isJumping;
         bool isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
 
-        // Return if the player isn't moving
-        if (!isMoving && !isSkiing) return;
+        // Set friction based on whether player is skiing or not
+        playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
+
+        Vector3 currentVelocity = rb.velocity;
+        Vector3 currentVelocityLocalSpace = transform.InverseTransformDirection(currentVelocity);
 
         // Get normal of ground below player
         // TODO: Use Contact Points to get ground data
         RaycastHit hit;
-        bool didHit = Physics.Raycast(new Ray(transform.position + (Vector3.down * (playerCollider.size.y/2f)), Vector3.down), out hit, 2f);
+        bool didHit = Physics.Raycast(new Ray(transform.position, Vector3.down), out hit, airCushionHeight);
         Vector3 groundNormal = didHit ? hit.normal : Vector3.up;
         Vector3 groundPoint = didHit ? hit.point : Vector3.zero;
-        bool isGrounded = didHit && hit.distance < 1f;
+        float distanceToGround = didHit ? hit.distance : airCushionHeight;
+        bool isGrounded = contactPoints.Count > 0 || (didHit && hit.distance <= (isSkiing ? 3.3f : 1.3f));
 
         // Check if the player runs into a step
-        if (isGrounded)
-        {
-            foreach (ContactPoint cp in contactPoints)
-            {
-                Vector3? stepUpOffset = ResolveStepUp(cp, groundPoint);
-                if (stepUpOffset != null)
-                {
-                    rb.position += (Vector3)stepUpOffset;
-                    rb.velocity = lastVelocity;
-                    break;
-                }
-            }
-        }
+        // if (isGrounded)
+        // {
+        //     Vector3 possibleGroundPoint = groundPoint;
+        //     foreach (ContactPoint cp in contactPoints)
+        //     {
+        //         Vector3? stepUpOffset = ResolveStepUp(cp, groundPoint);
+        //         if (stepUpOffset != null)
+        //         {
+        //             Debug.Log("Step Up: " + (Vector3)stepUpOffset);
+        //             possibleGroundPoint = transform.position + (Vector3)stepUpOffset;
+        //             rb.position += (Vector3)stepUpOffset;
+        //             rb.velocity = lastVelocity;
+        //             break;
+        //         }
+        //     }
+        //     lastKnownGroundedPoint = possibleGroundPoint;
+        // }
+        // else
+        // {
+        //     // Walk on ledge forgiveness (if player is not grounded but is close to the ground, they are considered grounded)
+        //     if (lastKnownGroundedPoint != Vector3.zero)
+        //     {
+        //         Debug.Log("Distance to last known ground:" + (Vector3.Distance(
+        //             transform.position - (transform.up * (playerCollider.height / 2f)), 
+        //             lastKnownGroundedPoint
+        //         )) + " < " + (playerCollider.radius));
+        //         if (Vector3.Distance(
+        //             transform.position - (transform.up * (playerCollider.height / 2f)), 
+        //             lastKnownGroundedPoint
+        //         ) < playerCollider.radius)
+        //         {
+        //             Debug.Log("Should adjust position? " + (transform.position.y < lastPosition.y));
+        //             if (transform.position.y < lastPosition.y)
+        //             {
+        //                 rb.position = new Vector3(
+        //                     transform.position.x,
+        //                     lastPosition.y,
+        //                     transform.position.z
+        //                 );
+        //             }
+        //             isGrounded = true;
+        //         }
+        //         else
+        //         {
+        //             lastKnownGroundedPoint = Vector3.zero;
+        //         }
+        //     }
+        // }
 
-        // Get direction of movement relative to player rotation
-        Vector3 movementDirection = transform.TransformDirection(movement).normalized;
+        // Calculate drag based on distance to ground
+        float adjustedDrag = Mathf.Lerp(
+            airCushionDrag,
+            drag,
+            distanceToGround / airCushionHeight
+        );
+        rb.drag = adjustedDrag;
+
+        // Return if the player isn't moving
+        if (!isMoving && !isSkiing) return;
+
         movementDirection = Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized;
-        Vector3 currentVelocity = rb.velocity;
-        Vector3 currentVelocityLocalSpace = transform.InverseTransformDirection(currentVelocity);
 
+        Vector3 inputForce = Vector3.zero;
         if (isSkiing)
         {
             // Skiing/Jetting Movement
 
-            // Set Zero Friction Material
-            playerCollider.material = skiMaterial;
+            // Caclulate horizontal vector
+            float currentHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude;
+            float currentVerticleMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude;
 
-            // Caclulate horizontal vector and apply velocity limits
-            float currentVelocityHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude;
-            Vector3 horizontalVector = ApplyJetVelocityComponentLimit(movementDirection * horizontalJetForce, currentVelocityHorizontalMagnitude,
-                                                            horizontalJetResistSpeed, horizontalJetResistFactor, horizontalJetMaxSpeed);
+            // Base forces for different directions
+            Vector3 horizontalVector = movementDirection * horizontalJetForce;
+            Vector3 upJetVector = isJetting ? Vector3.up * upJetForce : Vector3.zero;
+            Vector3 downJetVector = isDownJetting ? -Vector3.up * downJetForce : Vector3.zero;
 
-            // Calculate vertical vectors and apply velocity limits
-            float currentVelocityUpMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude;
-            float currentVelocityDownMagnitude = Vector3.Project(currentVelocity, -Vector3.up).magnitude;
-            Vector3 upJetVector = ApplyJetVelocityComponentLimit(isJetting ? Vector3.up * upJetForce : Vector3.zero,
-                                                    currentVelocityUpMagnitude, upJetResistSpeed, upJetResistFactor, upJetMaxSpeed);
-            Vector3 downJetVector = ApplyJetVelocityComponentLimit(isDownJetting ? -Vector3.up * downJetForce : Vector3.zero,
-                                                    currentVelocityDownMagnitude, downJetResistSpeed, downJetResistFactor, downJetMaxSpeed);
+            // Scale acceleration based on current speed
+            if (!isGrounded)
+            {
+                float accelFactor = Mathf.Lerp(
+                    jetAirMoveMaxAccelFactor,
+                    0f,
+                    (currentVelocity.magnitude - jetAirMoveMinSpeed) / jetAirMoveMaxSpeed
+                );
+                horizontalVector *= accelFactor;
+                upJetVector *= accelFactor;
+                downJetVector *= accelFactor;
+            }
+            else
+            {
+                float accelFactor = Mathf.Lerp(
+                    jetSkateMaxAccelFactor,
+                    0f,
+                    (inputForce.magnitude - jetSkateMinSpeed) / jetSkateMaxSpeed
+                );
+                horizontalVector *= accelFactor;
+            }
+
+
+            // Scale down speed based on resistance speeds
+            float horizontalMultiplier = ApplyComponentSpeedLimit(currentHorizontalMagnitude, horizontalResistSpeed, horizontalResistFactor, horizontalMaxSpeed);
+            float upMultiplier = ApplyComponentSpeedLimit(currentVerticleMagnitude, upResistSpeed, upResistFactor, upMaxSpeed);
+            float downMultiplier = ApplyComponentSpeedLimit(currentVerticleMagnitude, downResistSpeed, downResistFactor, downMaxSpeed);
+            horizontalVector *= horizontalMultiplier;
+            upJetVector *= upMultiplier;
+            downJetVector *= downMultiplier;
             
             // Combine vectors
-            Vector3 velocityChange = horizontalVector + upJetVector + downJetVector;
-
-            // Apply movement
-            rb.AddForce(velocityChange);
+            inputForce = horizontalVector + upJetVector + downJetVector;
         }
         else if (isGrounded)
         {
             // Running Movement
-
-            // Set Normal Friction Material
-            playerCollider.material = normalMaterial;
 
             // Check the angle of the surface to see if it can be run on
             float angle = Vector3.Angle(Vector3.up, movementDirection);
@@ -150,68 +249,75 @@ public class PlayerController : MonoBehaviour
             if (!canMove) return;
 
             // Caclulate velocity change vector
-            Vector3 velocityChange = movementDirection * runForce;
+            inputForce = movementDirection * runForce;
 
             // Cap max speed
             float speedCap = 0f;
             if (Mathf.Abs(currentVelocityLocalSpace.x) > Mathf.Abs(currentVelocityLocalSpace.z)) speedCap = maxRunSideSpeed;
             else speedCap = currentVelocityLocalSpace.z > 0 ? maxRunForwardSpeed : maxRunBackwardSpeed;
 
-            if (currentVelocity.magnitude > speedCap) velocityChange = Vector3.zero;
-
-            // Apply movement
-            rb.AddForce(velocityChange);
+            if (currentVelocity.magnitude > speedCap) inputForce = inputForce.normalized * speedCap;
         }
+        // else
+        // {
+        //     Debug.Log("I shouldn't be here... Grounded:" + isGrounded + " Skiing:" + isSkiing);
+        // }
+        // Air Control
+        // if (!isGrounded)
+        // {
+        //     // Debug.Log("Air Control Impulse: " + (movementDirection * directionalAirControlForce) / directionalAirControlK + "");
+        //     inputForce += ((movementDirection * directionalAirControlForce) / directionalAirControlK) * rb.mass;
+        //     // rb.AddForce(airControlVelocity - Vector3.ProjectOnPlane(currentVelocity, Vector3.up), ForceMode.Acceleration);
+        // }
+
+
+        
+        // Apply movement
+        inputForce -= currentVelocity;
+        rb.AddForce(inputForce);
+
     }
 
-    private Vector3? ResolveStepUp(ContactPoint stepTestCP, Vector3 groundPoint)
-    {
-        // Check if contact point it potentially a step
-        if (Mathf.Abs(stepTestCP.normal.y) >= 0.01f) return null;
-        if (stepTestCP.point.y - groundPoint.y >= maxStepHeight) return null;
+    // private Vector3? ResolveStepUp(ContactPoint stepTestCP, Vector3 groundPoint)
+    // {
+    //     // Check if contact point it potentially a step
+    //     if (Mathf.Abs(stepTestCP.normal.y) >= 0.01f) return null;
+    //     if (stepTestCP.point.y - groundPoint.y >= maxStepHeight) return null;
         
-        // Use raycast to check height and depth of step
-        RaycastHit hitInfo;
-        Collider stepCol = stepTestCP.otherCollider;
-        float stepHeight = groundPoint.y + maxStepHeight;
-        Vector3 stepTestInvDir = new Vector3(-stepTestCP.normal.x, 0, -stepTestCP.normal.z).normalized;
-        Vector3 origin = new Vector3(stepTestCP.point.x, stepHeight, stepTestCP.point.z) + 
-                                    (stepTestInvDir * stepSearchOvershoot);
-        if (!stepCol.Raycast(new Ray(origin, Vector3.down), out hitInfo, maxStepHeight)) return null;
+    //     // Use raycast to check height and depth of step
+    //     RaycastHit hitInfo;
+    //     Collider stepCol = stepTestCP.otherCollider;
+    //     float stepHeight = groundPoint.y + maxStepHeight;
+    //     Vector3 stepTestInvDir = new Vector3(-stepTestCP.normal.x, 0, -stepTestCP.normal.z).normalized;
+    //     Vector3 origin = new Vector3(stepTestCP.point.x, stepHeight, stepTestCP.point.z) + 
+    //                                 (stepTestInvDir * stepSearchOvershoot);
+    //     if (!stepCol.Raycast(new Ray(origin, Vector3.down), out hitInfo, maxStepHeight)) return null;
         
-        // Valid step, calculate offset to move player up
-        Vector3 stepUpPoint = new Vector3(stepTestCP.point.x, hitInfo.point.y, stepTestCP.point.z) + (stepTestInvDir * stepSearchOvershoot);
-        return stepUpPoint - new Vector3(stepTestCP.point.x, groundPoint.y, stepTestCP.point.z);
-    }
+    //     // Valid step, calculate offset to move player up
+    //     Vector3 stepUpPoint = new Vector3(stepTestCP.point.x, hitInfo.point.y, stepTestCP.point.z) + (stepTestInvDir * stepSearchOvershoot);
+    //     return stepUpPoint - new Vector3(stepTestCP.point.x, groundPoint.y, stepTestCP.point.z);
+    // }
 
-    private Vector3 ApplyJetVelocityComponentLimit(
-                                        Vector3 desiredVelocity,
-                                        float currentVelocityComponentMagnitude,
-                                        float componentResistSpeed,
-                                        float componentResistFactor,
-                                        float componentMaxSpeed
-    )
+    private float ApplyComponentSpeedLimit(float currentComponentMagnitude, float resistSpeed, float resistFactor, float maxSpeed)
     {
+        float adjustedResistFactor = 1f;
+
         // Apply resistances
-        if (currentVelocityComponentMagnitude > componentResistSpeed)
+        if (currentComponentMagnitude > resistSpeed)
         {
-            float resistFactor = Mathf.Lerp(
-                1f,
-                componentResistFactor,
-                (currentVelocityComponentMagnitude - componentResistSpeed) / (componentMaxSpeed - componentResistSpeed)
+            adjustedResistFactor = Mathf.Lerp(
+                resistFactor,
+                0f,
+                (currentComponentMagnitude - resistSpeed) / (maxSpeed - resistSpeed)
             );
-            desiredVelocity *= resistFactor;
         }
-        // Cap max speed
-        if (currentVelocityComponentMagnitude > componentMaxSpeed) desiredVelocity = Vector3.zero;
-        return desiredVelocity;
+        return adjustedResistFactor;
     }
 
     private void HandleRotation()
     {
         Vector2 rotationInput = playerControls.Movement.LookVector.ReadValue<Vector2>();
         Vector3 rotation = new Vector3(0f, rotationInput.x, 0f);
-        // Vector3 rotation = new Vector3(rotationInput.y, rotationInput.x, 0f);
         rotation *= rotationSpeed * Time.fixedDeltaTime;
         rotation = Vector3.ClampMagnitude(rotation, rotationLimit);
         transform.Rotate(rotation);
@@ -226,160 +332,3 @@ public class PlayerController : MonoBehaviour
         contactPoints.AddRange(col.contacts);
     }
 }
-
-    /* IMPORTANT VALUES
-
-    BASE PLAYER:
-
-    drag = 0.004;                         <----- Drag for running or jetting above 10 meters
-    airCushionDrag = 0.00275;             <----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
-    airCushionHeight = 10.0;              <----- this is probably the height at which the airCushionDrag stops being applied
-
-    // jet acceleration resistance        <----- No idea what these values are
-    horizontalJetResistance = 0.0017;
-    horizontalJetResistanceFactor = 1.8;
-    verticalJetResistance = 0.0006;
-    verticalJetResistanceFactor = 1.8;
-    overdriveJetResistance = 0.00012;
-    overdriveJetResistanceFactor = 1.95;
-
-    // directional jetting in air
-    // all air movement(up, down, directional)
-    jetAirMoveMinSpeed = 5;
-    jetAirMoveMaxSpeed = 1000;
-    jetAirMoveMaxAccelFactor = 1.5;      <---- ????
-
-    // Jet-Skating
-    // cardinal directional
-    jetSkateMinSpeed = 10;
-    jetSkateMaxSpeed = 1000;
-    jetSkateMaxAccelFactor = 3;         <---- ????
-
-    // Air control
-    useDirectionalAirControl = false;        // uhhhhhh
-    directionalAirControlK = 32; 
-    directionalAirControlForce = 275;
-    
-    // air control
-    airControl = 1.0;
-
-
-
-
-
-
-
-
-    // camera
-    cameraMaxDist = 4.5;          // third person camera distance
-    cameraMinDist = 0.2;          // closest the camera can be in third person
-    cameraDefaultFov = 110.0;     // field of view for cameras on this player (degrees)
-    cameraMinFov = 5.0;           // minimum field of view for cameras on this player (degrees)
-    cameraMaxFov = 140.0;         // maximum field of view for cameras on this player (degrees)
-    minLookAngle = -1.57;         // lowest look angle (radians)
-    maxLookAngle = 1.57;          // highest look angle (radians)
-    maxFreelookAngle = 0;         // field of view angle when free looking (radians)
-
-    takesFallingDamage = true; // this is a dynamic field
-    fallDamageScale = 0.55; //0.53;
-    fallDamageCurve = 2.7; //2.65; 
-    fallDamageZBias = 0.6; //0.7;
-    fallDamageMinSpeed = 50;
-    fallDamageBBMultiplier = 0.8;
-
-    // healing
-    autohealRate = 6.25;
-    autohealGroundHeight = 0.4;
-    autohealDamageDelay = 5000;
-
-    // cooling
-    coolingRate = 10;
-    velocityCooling = 0.25;
-
-    // impact camera shake
-    groundImpactMinSpeed = 20;
-    groundImpactShakeFreq = "100 100 100";
-    groundImpactShakeAmp = "0.075 0.081 0.08";
-    groundImpactShakeDuration = 0.2;
-    groundImpactShakeFalloff = 2;
-
-    // impact recovery
-    minImpactSpeed = 20;
-    recoverDelay = 5;
-
-    // jumping
-    jumpForce = 2000;
-    jumpSurfaceAngle = 80;
-    jumpDelay = 0;
-    minJumpSpeed = 10;
-    maxJumpSpeed = 15;
-
-    // energy
-    maxEnergy = 40;               // amount of energy
-    rechargeRate = 6.875;           // energy recharge rate
-    groundRechargeRate = 12.5;      // on-ground recharge rate (ADDITIVE WITH RECHARGERATE!!)
-    jetUpEnergyDrain = 22.5;
-    jetDownEnergyDrain = 21.875;
-    jetSkateEnergyDrain = 4.6875;
-
-    // Overdrive
-    overdriveSpeedZBias = 0.3;
-    overdriveEnterSpeed = 88.0;
-    overdriveExitSpeed = 78;
-    overdriveInitialForceDuration = 2000.0;
-    overdriveInitialForce = 220.0;
-    overdriveForce = 160.0;
-    overdriveDamage = 18.75;
-    overdriveEnergyDrain = 1000.0;
-    overdriveIsContagious = true;
-    overdriveForceRadius = 10;
-    overdriveForceScale = 1;
-    overdriveForceScaleAhead = 1;
-    overdriveForceScaleBehind = 1;
-    overdriveForceScaleAlong = 1;
-    overdriveForceScaleAgainst = 1;
-    overdriveFOV = 25.0;
-    heatShellDataBlock = PlayerHeatShell;
-    overdriveExplosionDamage = 30;
-    overdriveExplosionRadius = 15;
-    overdriveExplosionInnerRadius = 5;
-    areaImpulse = 0;
-
-    // spawning
-    respawnTimeout = 4000;
-    suicideRespawnTimeout = 4000;
-
-    // bounds
-    boundingBox = "2.1 2.1 2.8";
-    boxOffset = "0.0 0.0 0.0";
-    pickupRadius = 0.75;
-
-
-
-
-    OUTRIDER:
-    maxForwardSpeed = 20;
-    maxBackwardSpeed = 20;
-    maxSideSpeed = 20;
-    dodgeImpulse = 15000;
-
-    // overdrive resistance
-    overdriveJetResistance = 0.00008;
-    overdriveJetResistanceFactor = 1.95;
-
-    // gameplay changes for Outrider
-    mass = 75;
-    maxDamage = 75; //70;
-    overdriveDamage = 15.625;
-    overdriveKillsEnergy = true;
-    jetUpForceZ = 7031.25;
-    jetDownForceZ = 5156.25;
-
-    fallDamageBBMultiplier = 0.7;
-
-    // lowered max energy
-    maxEnergy = 33;
-    rechargeRate = 5.625;
-    groundRechargeRate = 12.5;
-
-    */
