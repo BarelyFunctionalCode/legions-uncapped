@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    // [SerializeField] private float gravity = 40f;
-    // void Awake()
-    // {
-    //     Physics.gravity = Vector3.up * -gravity;
-    // }
+    [SerializeField] private float timeScale = 1.0f;
+    void Update()
+    {
+        if (timeScale != Time.timeScale)
+            Time.timeScale = timeScale;
+    }
 }
