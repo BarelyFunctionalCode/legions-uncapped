@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private float gravity = -55f;
+    private float density = 10f;
     private float drag = 0.004f;                         //<----- Drag for running or jetting above 10 meters
     private float airCushionDrag = 0.00275f;             //<----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
     private float airCushionHeight = 10.0f;              //<----- this is probably the height at which the airCushionDrag stops being applied
@@ -47,11 +49,11 @@ public class PlayerController : MonoBehaviour
 
     // Air control
     // private bool useDirectionalAirControl = false;        // uhhhhhh
-    private float directionalAirControlK = 32f; 
-    private float directionalAirControlForce = 275f;
+    // private float directionalAirControlK = 32f; 
+    // private float directionalAirControlForce = 275f;
     
     // air control
-    // private float airControl = 1.0f;
+    private float airControl = 1.0f;
 
     private float mass = 75f;
 
@@ -78,6 +80,7 @@ public class PlayerController : MonoBehaviour
     {
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody>();
+        rb.sleepThreshold = 0.0f;
         rb.mass = mass;
         playerCollider = GetComponent<CapsuleCollider>();
         playerCollider.material = normalMaterial;
@@ -97,6 +100,163 @@ public class PlayerController : MonoBehaviour
     }
 
     private void HandleMovement()
+    {
+        // Get movement input
+        Vector2 movementInput = playerControls.Movement.MoveVector.ReadValue<Vector2>();
+        Vector3 movement = new Vector3(movementInput.x, 0f, movementInput.y);
+        // Get direction of movement relative to player rotation
+        Vector3 movementDirection = transform.TransformDirection(movement).normalized;
+    
+        // Get input for skiing, jumping, and down jetting
+        bool isMoving = movement.magnitude > 0.0f;
+        bool isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f;
+        bool isJumping = playerControls.Movement.Jump.ReadValue<float>() > 0.0f;
+        bool isJetting = isSkiing && isJumping;
+        bool isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
+
+        // Set friction based on whether player is skiing or not
+        playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
+
+        Vector3 currentVelocity = rb.velocity;
+        Vector3 currentVelocityLocalSpace = transform.InverseTransformDirection(currentVelocity);
+        float currentHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude;
+        float currentVerticleMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude;
+
+        // Apply gravity
+        Vector3 accumulatedVelocityChanges = Vector3.zero;
+        accumulatedVelocityChanges += Vector3.up * gravity * Time.fixedDeltaTime;
+
+        // Get distance to ground
+        RaycastHit hit;
+        bool didHit = Physics.Raycast(new Ray(transform.position, Vector3.down), out hit);
+        float distanceToGround = didHit ? hit.distance : Mathf.Infinity;
+
+        
+        // Get normal of ground below player
+        // TODO: Use Contact Points to get ground data
+        Vector3 groundNormal = Vector3.up;
+        Vector3 groundPoint = Vector3.zero;
+        bool isGrounded = contactPoints.Count > 0 || distanceToGround < 2.3f;
+        if (isGrounded)
+        {
+            // Get average normal of all contact points
+            foreach (ContactPoint contactPoint in contactPoints)
+            {
+                groundNormal += contactPoint.normal;
+                groundPoint += contactPoint.point;
+            }
+            groundNormal /= contactPoints.Count;
+            groundPoint /= contactPoints.Count;
+            lastKnownGroundedPoint = groundPoint;
+        }
+        // else
+        // {
+        //     // If not grounded, use last known ground point to get ground normal
+        //     groundPoint = lastKnownGroundedPoint;
+        //     groundNormal = (transform.position - groundPoint).normalized;
+        // }
+
+        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized;
+
+        // Run and Air Control Movement
+        if (isMoving && (!isGrounded || (isGrounded && !isSkiing)))
+        {
+            // Get speed for given direction (m/s)
+            float moveSpeed = 0f;
+            if (Mathf.Abs(movement.x) >= Mathf.Abs(movement.z)) moveSpeed = maxRunSideSpeed;
+            else moveSpeed = movement.z >= 0 ? maxRunForwardSpeed : maxRunBackwardSpeed;
+
+            // Caclulate velocity change vector
+            float maxAcc = (runForce / mass) * Time.fixedDeltaTime;
+            if (isGrounded)
+            {
+                Vector3 inputAcc = movementDirectionAdjusted * (moveSpeed / movementDirectionAdjusted.magnitude);
+
+                // Check the angle of the surface to see if it can be run on
+                float angle = Vector3.Angle(Vector3.up, movementDirectionAdjusted);
+                bool canMove = 90 - angle < maxRunUpSurfaceAngle;
+
+                if (canMove)
+                {
+                    inputAcc -= (currentVelocity + accumulatedVelocityChanges);
+                    float inputSpeed = inputAcc.magnitude;
+                    if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+                    accumulatedVelocityChanges += inputAcc;
+                }
+            }
+            else
+            {
+                Vector3 inputAcc = movementDirection * (moveSpeed / movementDirection.magnitude);
+
+                inputAcc -= accumulatedVelocityChanges;
+                float inputSpeed = inputAcc.magnitude;
+                inputAcc.y = 0;
+                inputAcc.x *= airControl;
+                inputAcc.z *= airControl;
+                maxAcc *= 0.3f;
+                if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+                accumulatedVelocityChanges += inputAcc;
+            }
+        }
+
+        // Jumping Movement
+        // TODO: Add jump force to accumulatedVelocityChanges
+
+        // Skiing and Jetting Movement
+        // if (isSkiing)
+        // {
+
+        // }
+
+        // if (accumulatedVelocityChanges.magnitude > 0.0f)
+        //     rb.velocity += accumulatedVelocityChanges;
+
+        // // TODO: Add horizontal and verticle resist speeds
+        // /*
+        // if(hvel > mDataBlock->horizResistSpeed)
+        // {
+        //     F32 speedCap = hvel;
+        //     if(speedCap > mDataBlock->horizMaxSpeed)
+        //         speedCap = mDataBlock->horizMaxSpeed;
+        //     speedCap -= mDataBlock->horizResistFactor * TickSec * (speedCap - mDataBlock->horizResistSpeed);
+        //     F32 scale = speedCap / hvel;
+        //     mVelocity.x *= scale;
+        //     mVelocity.y *= scale;
+        // }
+        // if(mVelocity.z > mDataBlock->upResistSpeed)
+        // {
+        //     if(mVelocity.z > mDataBlock->upMaxSpeed)
+        //         mVelocity.z = mDataBlock->upMaxSpeed;
+        //     mVelocity.z -= mDataBlock->upResistFactor * TickSec * (mVelocity.z - mDataBlock->upResistSpeed);
+        // }
+        // */
+        // if (currentHorizontalMagnitude > horizontalMaxSpeed)
+        // {
+        //     float speedCap = currentHorizontalMagnitude;
+        //     if (speedCap > horizontalMaxSpeed)
+        //         speedCap = horizontalMaxSpeed;
+        //     speedCap -= horizontalResistFactor * Time.fixedDeltaTime * (speedCap - horizontalResistSpeed);
+        //     float scale = speedCap / currentHorizontalMagnitude;
+        //     rb.velocity = new Vector3(rb.velocity.x * scale, rb.velocity.y, rb.velocity.z * scale);
+        // }
+        // // Get direction of verticle velocity
+        // Vector3 verticleVelocityDirection = Vector3.Project(currentVelocity, Vector3.up).normalized;
+        // bool goingUp = verticleVelocityDirection.y > 0;
+        // float verticleMaxSpeed = goingUp ? upMaxSpeed : downMaxSpeed;
+        // float verticleResistSpeed = goingUp ? upResistSpeed : downResistSpeed;
+        // float verticleResistFactor = goingUp ? upResistFactor : downResistFactor;
+        // if (currentVerticleMagnitude > verticleMaxSpeed)
+        // {
+        //     if (currentVerticleMagnitude > verticleMaxSpeed)
+        //         rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, verticleMaxSpeed);
+        //     rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, rb.velocity.z - verticleResistFactor * Time.fixedDeltaTime * (rb.velocity.z - verticleResistSpeed));
+        // }
+
+        // Apply Drag
+        rb.velocity -= rb.velocity * drag * Time.fixedDeltaTime;
+    }
+
+    private void OLD_HandleMovement()
     {
         // Get movement input
         Vector2 movementInput = playerControls.Movement.MoveVector.ReadValue<Vector2>();
@@ -182,7 +342,7 @@ public class PlayerController : MonoBehaviour
             drag,
             distanceToGround / airCushionHeight
         );
-        rb.drag = adjustedDrag;
+        rb.drag = adjustedDrag * density;
 
         // Return if the player isn't moving
         if (!isMoving && !isSkiing) return;
@@ -206,23 +366,32 @@ public class PlayerController : MonoBehaviour
             // Scale acceleration based on current speed
             if (!isGrounded)
             {
-                float accelFactor = Mathf.Lerp(
-                    jetAirMoveMaxAccelFactor,
-                    0f,
-                    (currentVelocity.magnitude - jetAirMoveMinSpeed) / jetAirMoveMaxSpeed
-                );
-                horizontalVector *= accelFactor;
-                upJetVector *= accelFactor;
-                downJetVector *= accelFactor;
-            }
-            else
-            {
-                float accelFactor = Mathf.Lerp(
-                    jetSkateMaxAccelFactor,
-                    0f,
-                    (inputForce.magnitude - jetSkateMinSpeed) / jetSkateMaxSpeed
-                );
-                horizontalVector *= accelFactor;
+                // TODO: https://github.com/GarageGames/Torque3D/blob/fcac140405b2fbe7c54e7a2dc6e3b10b79c8983f/Engine/source/T3D/player.cpp#L2933
+                if (isJetting)
+                {
+                    float horizontalAccelFactor = Mathf.Lerp(
+                        jetAirMoveMaxAccelFactor,
+                        0f,
+                        (currentHorizontalMagnitude - jetAirMoveMinSpeed) / (jetAirMoveMaxSpeed - jetAirMoveMinSpeed)
+                    );
+                    float verticleAccelFactor = Mathf.Lerp(
+                        jetAirMoveMaxAccelFactor,
+                        0f,
+                        (currentVerticleMagnitude - jetAirMoveMinSpeed) / (jetAirMoveMaxSpeed - jetAirMoveMinSpeed)
+                    );
+                    horizontalVector *= horizontalAccelFactor;
+                    upJetVector *= verticleAccelFactor;
+                    downJetVector *= verticleAccelFactor;
+                }
+                else
+                {
+                    float accelFactor = Mathf.Lerp(
+                        jetSkateMaxAccelFactor,
+                        0f,
+                        (currentHorizontalMagnitude - jetSkateMinSpeed) / (jetSkateMaxSpeed - jetSkateMinSpeed)
+                    );
+                    horizontalVector *= accelFactor;
+                }
             }
 
 
@@ -300,6 +469,8 @@ public class PlayerController : MonoBehaviour
 
     private float ApplyComponentSpeedLimit(float currentComponentMagnitude, float resistSpeed, float resistFactor, float maxSpeed)
     {
+
+        // TODO: https://github.com/GarageGames/Torque3D/blob/fcac140405b2fbe7c54e7a2dc6e3b10b79c8983f/Engine/source/T3D/player.cpp#L2978
         float adjustedResistFactor = 1f;
 
         // Apply resistances
@@ -308,7 +479,7 @@ public class PlayerController : MonoBehaviour
             adjustedResistFactor = Mathf.Lerp(
                 resistFactor,
                 0f,
-                (currentComponentMagnitude - resistSpeed) / (maxSpeed - resistSpeed)
+                currentComponentMagnitude/resistSpeed
             );
         }
         return adjustedResistFactor;
