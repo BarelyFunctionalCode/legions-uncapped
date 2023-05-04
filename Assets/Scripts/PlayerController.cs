@@ -208,8 +208,8 @@ public class PlayerController : MonoBehaviour
 
         // }
 
-        // if (accumulatedVelocityChanges.magnitude > 0.0f)
-        //     rb.velocity += accumulatedVelocityChanges;
+        if (accumulatedVelocityChanges.magnitude > 0.0f)
+            rb.velocity += accumulatedVelocityChanges;
 
         // // TODO: Add horizontal and verticle resist speeds
         // /*
