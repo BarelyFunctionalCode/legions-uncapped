@@ -217,7 +217,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: yVel
+  m_BlendParameter: yDir
   m_BlendParameterY: Blend
   m_MinThreshold: -1
   m_MaxThreshold: 1
@@ -373,7 +373,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: yVel
+  m_BlendParameter: yDir
   m_BlendParameterY: z
   m_MinThreshold: -1
   m_MaxThreshold: 0
@@ -404,7 +404,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: yVel
+  m_BlendParameter: yDir
   m_BlendParameterY: Blend
   m_MinThreshold: -1
   m_MaxThreshold: 0
@@ -535,8 +535,8 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: xVel
-  m_BlendParameterY: zVel
+  m_BlendParameter: xDir
+  m_BlendParameterY: zDir
   m_MinThreshold: 0
   m_MaxThreshold: 1
   m_UseAutomaticThresholds: 1
@@ -576,66 +576,72 @@ AnimatorController:
   m_Name: outrider_animation_controller
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: xVel
+  - m_Name: xDir
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
+  - m_Name: yDir
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: zDir
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
   - m_Name: yVel
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: zVel
-    m_Type: 1
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: isRunning
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: isSkiing
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: isJetting
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: isGrounded
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: triggerJump
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: triggerOverdrive
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: triggerStopOverdrive
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -747,8 +753,8 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: xDir
     m_Mirror: 0
-  m_BlendParameter: xVel
-  m_BlendParameterY: zVel
+  m_BlendParameter: xDir
+  m_BlendParameterY: zDir
   m_MinThreshold: 0
   m_MaxThreshold: 0.75
   m_UseAutomaticThresholds: 1
@@ -806,7 +812,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: yVel
+  m_BlendParameter: yDir
   m_BlendParameterY: Blend
   m_MinThreshold: -1
   m_MaxThreshold: 0
@@ -995,8 +1001,8 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: xVel
-  m_BlendParameterY: zVel
+  m_BlendParameter: xDir
+  m_BlendParameterY: zDir
   m_MinThreshold: 0
   m_MaxThreshold: 0.85714287
   m_UseAutomaticThresholds: 1
@@ -1078,7 +1084,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: x
     m_Mirror: 0
-  m_BlendParameter: yVel
+  m_BlendParameter: yDir
   m_BlendParameterY: Blend
   m_MinThreshold: -1
   m_MaxThreshold: 0
