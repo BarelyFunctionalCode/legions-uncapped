@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 747664ce603ebe34aa0bf8db48052069
+guid: 7071712746093724db10837ea75b71da
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable:
@@ -49,7 +49,7 @@ ModelImporter:
       74: -4781176193293448270
     second: fall_end
   - first:
-      74: 689232082391487958
+      74: -2169464637700480922
     second: jet_neutral
   - first:
       74: -695613643311920400
@@ -85,7 +85,7 @@ ModelImporter:
       74: 2898252640812036697
     second: ski_left
   - first:
-      74: -6782930455118938072
+      74: 689232082391487958
     second: jet_up
   - first:
       74: 4818575159049717810
@@ -102,7 +102,12 @@ ModelImporter:
   - first:
       74: -2074999912226268479
     second: left_arm_flag_throw
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: or4save_lfighterdif
+    second: {fileID: 2100000, guid: 61a3b8bfe6eaccc40b7bd4a4a3d0ee3b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -114,8 +119,7 @@ ModelImporter:
     resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
-    rigImportErrors: "Invalid Avatar Rig Configuration. Missing or invalid transform:\n\tRequired
-      human bone 'Head' not found\n"
+    rigImportErrors: 
     rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
@@ -123,7 +127,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -131,6 +135,35 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations:
+    - serializedVersion: 16
+      name: Armature|Action
+      takeName: Armature|Action
+      internalID: 0
+      firstFrame: 0
+      lastFrame: 2079
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: idle
       takeName: Armature|Action
@@ -144,7 +177,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -230,7 +263,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -259,7 +292,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -318,7 +351,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -347,7 +380,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -376,7 +409,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -405,7 +438,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -435,9 +468,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -464,9 +497,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -492,10 +525,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -522,9 +555,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -550,10 +583,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -579,10 +612,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -608,10 +641,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -637,10 +670,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -666,10 +699,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -695,10 +728,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -724,10 +757,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -753,7 +786,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -782,10 +815,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -811,10 +844,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -840,10 +873,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -869,10 +902,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -898,10 +931,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -928,9 +961,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -956,10 +989,10 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlend: 1
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -986,9 +1019,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -1015,9 +1048,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -1044,9 +1077,9 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -1105,237 +1138,7 @@ ModelImporter:
   humanDescription:
     serializedVersion: 3
     human: []
-    skeleton:
-    - name: outrider_base(Clone)
-      parentName: 
-      position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: mesh_core_torso_Skin100
-      parentName: outrider_base(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: Armature
-      parentName: outrider_base(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: root
-      parentName: Armature
-      position: {x: 1.4207441e-12, y: 0.00017433174, z: 0.0013006348}
-      rotation: {x: 0.09988986, y: 0.99499476, z: 0.002725914, w: -0.00023127167}
-      scale: {x: 0.9999999, y: 1.0000002, z: 0.9999999}
-    - name: parent_joint
-      parentName: root
-      position: {x: 0.00024919413, y: 0.0013350201, z: -0.00802998}
-      rotation: {x: -0.7063875, y: 0.069277436, z: 0.69908684, w: 0.086574}
-      scale: {x: 0.99999994, y: 1.0000007, z: 1.0000002}
-    - name: waist_joint
-      parentName: parent_joint
-      position: {x: 0.003605119, y: 6.518634e-10, z: -0.0000007292273}
-      rotation: {x: -0.104322754, y: -0.11369928, z: -0.6674924, w: 0.72845256}
-      scale: {x: 1.0000008, y: 1, z: 1}
-    - name: spine1_joint
-      parentName: waist_joint
-      position: {x: 7.0780515e-10, y: 0.002289248, z: -2.2351741e-10}
-      rotation: {x: 0.014986437, y: -0.040861428, z: 0.040956244, w: 0.9982126}
-      scale: {x: 1.0000006, y: 0.99999994, z: 1.0000001}
-    - name: spine2_joint
-      parentName: spine1_joint
-      position: {x: 7.0780515e-10, y: 0.0015682243, z: -7.4505804e-11}
-      rotation: {x: 0.000000033458434, y: 0.9498762, z: 0.000000032845637, w: -0.3126263}
-      scale: {x: 1.0000001, y: 1.0000001, z: 1.0000004}
-    - name: spine3_joint
-      parentName: spine2_joint
-      position: {x: -2.6077032e-10, y: 0.0015682285, z: -1.8626451e-11}
-      rotation: {x: 0.9624243, y: 0.24080089, z: 0.12133553, w: 0.0321298}
-      scale: {x: 0.99999994, y: 0.9999998, z: 1.0000006}
-    - name: left_shoulder_joint
-      parentName: spine3_joint
-      position: {x: 0.00041372195, y: -0.0011203777, z: -0.0029036824}
-      rotation: {x: -0.5071819, y: 0.5141166, z: -0.49791655, w: 0.4801353}
-      scale: {x: 1.0000004, y: 1.0000004, z: 1}
-    - name: left_elbow_joint
-      parentName: left_shoulder_joint
-      position: {x: 0.0000000018626451, y: 0.0042897807, z: -0.0000000021001323}
-      rotation: {x: -0.019790674, y: 0.9971732, z: 0.01787227, w: 0.07024734}
-      scale: {x: 1.0000004, y: 0.9999992, z: 0.99999994}
-    - name: left_wrist_joint
-      parentName: left_elbow_joint
-      position: {x: -0.000000004917383, y: 0.0030467818, z: -2.2351741e-10}
-      rotation: {x: 0.5411658, y: 0.50474143, z: 0.41876298, w: 0.52632046}
-      scale: {x: 0.9999995, y: 1, z: 1.0000004}
-    - name: left_finger1_joint
-      parentName: left_wrist_joint
-      position: {x: 0.0011093137, y: -0.000040619503, z: 0.00028375073}
-      rotation: {x: -0.42117462, y: -0.40052816, z: -0.4727744, w: 0.6623243}
-      scale: {x: 1.0000004, y: 1.0000002, z: 0.9999999}
-    - name: left_finger2_joint
-      parentName: left_finger1_joint
-      position: {x: 3.72529e-10, y: 0.0005954689, z: 7.1711836e-10}
-      rotation: {x: 0.03493195, y: -0.36793682, z: 0.00083360024, w: 0.9291941}
-      scale: {x: 0.9999994, y: 1.0000005, z: 1.0000001}
-    - name: left_finger3_joint
-      parentName: left_finger2_joint
-      position: {x: 0.0000000010430813, y: 0.0005188172, z: 1.4901161e-10}
-      rotation: {x: 0.037086673, y: 0.8970498, z: -0.00909345, w: 0.44027668}
-      scale: {x: 1.000001, y: 0.9999998, z: 0.9999993}
-    - name: left_finger3_joint_end
-      parentName: left_finger3_joint
-      position: {x: -0, y: 0.0005188167, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: left_thumb3_joint0
-      parentName: left_wrist_joint
-      position: {x: 0.00024123937, y: 0.0002634425, z: 0.0003707382}
-      rotation: {x: 0.47370976, y: 0.7155741, z: 0.49922305, w: -0.11970501}
-      scale: {x: 1.0000001, y: 0.99999964, z: 1.0000002}
-    - name: left_thumb2_joint
-      parentName: left_thumb3_joint0
-      position: {x: 3.72529e-10, y: 0.0006960584, z: 7.4505804e-11}
-      rotation: {x: 0.03070347, y: 0.03722228, z: 0.0007086389, w: 0.998835}
-      scale: {x: 0.9999995, y: 1.0000012, z: 0.99999976}
-    - name: left_thumb3_joint
-      parentName: left_thumb2_joint
-      position: {x: -2.2351741e-10, y: 0.0005753648, z: 2.9802322e-10}
-      rotation: {x: 0.0012011684, y: 0.29981348, z: 0.006981167, w: 0.95397156}
-      scale: {x: 1.0000005, y: 1, z: 1.0000005}
-    - name: left_thumb3_joint_end
-      parentName: left_thumb3_joint
-      position: {x: -0, y: 0.00057536777, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: group2
-      parentName: left_wrist_joint
-      position: {x: 0.0023053554, y: -0.001166742, z: 0.0028784652}
-      rotation: {x: -0.3891625, y: 0.2407187, z: 0.026807563, w: 0.88875663}
-      scale: {x: 1.0000001, y: 1, z: 0.99999976}
-    - name: mount2
-      parentName: group2
-      position: {x: -3.72529e-10, y: 0.00087393966, z: 0.0000000020861626}
-      rotation: {x: 0.8135388, y: 0.034209784, z: 0.14249763, w: 0.5627422}
-      scale: {x: 0.9999999, y: 0.9999995, z: 1.000001}
-    - name: dummy_flag
-      parentName: mount2
-      position: {x: 0.0000000018626451, y: 0.0016016295, z: -5.9604643e-10}
-      rotation: {x: 0.055375315, y: 0.29586315, z: -0.20872092, w: 0.9305021}
-      scale: {x: 1, y: 1.0000001, z: 1}
-    - name: dummy_flag_end
-      parentName: dummy_flag
-      position: {x: -0, y: 0.0016016327, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: thruster_joint
-      parentName: spine3_joint
-      position: {x: -0.00046773083, y: -0.004195576, z: 0.0000000014879724}
-      rotation: {x: 0.09976801, y: 0.07648889, z: -0.60793906, w: 0.7839681}
-      scale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
-    - name: thruster_joint_end
-      parentName: thruster_joint
-      position: {x: -0, y: 0.0038982758, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: left_topjet_joint
-      parentName: spine3_joint
-      position: {x: 0.0013531127, y: -0.003598464, z: -0.0039127725}
-      rotation: {x: -0.36067748, y: 0.6082502, z: 0.68265635, w: 0.18418412}
-      scale: {x: 0.9999999, y: 1.0000001, z: 1.0000004}
-    - name: left_topjet_joint_end
-      parentName: left_topjet_joint
-      position: {x: -0, y: 0.0038982767, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: right_topjet_joint
-      parentName: spine3_joint
-      position: {x: 0.0013648545, y: -0.003579068, z: 0.00410763}
-      rotation: {x: 0.6082503, y: 0.3606775, z: -0.18418413, w: 0.6826562}
-      scale: {x: 1.0000002, y: 1.0000001, z: 1.0000005}
-    - name: right_topjet_joint_end
-      parentName: right_topjet_joint
-      position: {x: -0, y: 0.0038982758, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: right_shoulder_joint
-      parentName: spine3_joint
-      position: {x: 0.0005134892, y: -0.000885721, z: 0.0030304568}
-      rotation: {x: -0.49283084, y: 0.53155893, z: 0.48712775, w: -0.48710322}
-      scale: {x: 1.0000005, y: 0.9999997, z: 0.99999964}
-    - name: right_elbow_joint
-      parentName: right_shoulder_joint
-      position: {x: 0.0000000023469329, y: 0.003631213, z: 9.685754e-10}
-      rotation: {x: -0.019463476, y: 0.7467446, z: -0.017848976, w: 0.6645865}
-      scale: {x: 1.0000006, y: 0.99999976, z: 0.99999946}
-    - name: mount0
-      parentName: right_elbow_joint
-      position: {x: 0.0000000010800432, y: 0.0023302233, z: 0.0000000018684658}
-      rotation: {x: -0.000157173, y: 0.81123096, z: 0.000112702095, w: 0.58472586}
-      scale: {x: 0.9999996, y: 1, z: 0.99999976}
-    - name: mount0_end
-      parentName: mount0
-      position: {x: -0, y: 0.002330231, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: left_hip_joint
-      parentName: parent_joint
-      position: {x: 0.0031626532, y: -0.00029204952, z: -0.0013988266}
-      rotation: {x: 0.59310055, y: -0.5850571, z: -0.27534407, w: -0.47971407}
-      scale: {x: 1, y: 1, z: 1.0000007}
-    - name: left_knee_joint
-      parentName: left_hip_joint
-      position: {x: 2.9802322e-10, y: 0.0059999996, z: -0.0000000013411044}
-      rotation: {x: 0.12737778, y: 0.89034826, z: -0.3118888, w: -0.30623582}
-      scale: {x: 0.99999994, y: 1.0000005, z: 1.0000008}
-    - name: left_ankle_joint
-      parentName: left_knee_joint
-      position: {x: 0.0000000032782554, y: 0.0052208826, z: -0.000000004079193}
-      rotation: {x: -0.032191582, y: 0.66220534, z: 0.39974427, w: 0.632971}
-      scale: {x: 1.0000006, y: 0.9999993, z: 1.0000007}
-    - name: left_heel_joint
-      parentName: left_ankle_joint
-      position: {x: -7.4505804e-11, y: 0.002469827, z: -4.4703483e-10}
-      rotation: {x: 0.9036562, y: 0.093005754, z: -0.32303244, w: 0.26534027}
-      scale: {x: 1.0000001, y: 1.0000006, z: 0.9999999}
-    - name: left_toe_joint
-      parentName: left_heel_joint
-      position: {x: 4.208414e-10, y: 0.0042665396, z: 0.0000000019761501}
-      rotation: {x: 0.4755412, y: 0.560184, z: 0.3442098, w: 0.5844434}
-      scale: {x: 1.000001, y: 1.0000012, z: 1.000001}
-    - name: left_toe_joint_end
-      parentName: left_toe_joint
-      position: {x: -0, y: 0.0010571469, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: right_hip_joint
-      parentName: parent_joint
-      position: {x: 0.0031631892, y: -0.00029204326, z: 0.0014216608}
-      rotation: {x: -0.6469416, y: 0.7513831, z: 0.008095918, w: -0.12970917}
-      scale: {x: 1.0000008, y: 1.0000006, z: 1}
-    - name: right_knee_joint
-      parentName: right_hip_joint
-      position: {x: 0.000000002980232, y: 0.005999995, z: 2.2351741e-10}
-      rotation: {x: 0.21329746, y: 0.13375711, z: -0.2603183, w: 0.93211997}
-      scale: {x: 0.9999998, y: 1.000001, z: 0.9999999}
-    - name: right_ankle_joint
-      parentName: right_knee_joint
-      position: {x: -0.0000000027567149, y: 0.00522088, z: 1.2340023e-10}
-      rotation: {x: 0.005099682, y: -0.5923817, z: -0.2209837, w: 0.7747413}
-      scale: {x: 1.0000002, y: 0.9999996, z: 1.0000007}
-    - name: right_heel_joint
-      parentName: right_ankle_joint
-      position: {x: 1.11758706e-10, y: 0.0024789015, z: 5.2154064e-10}
-      rotation: {x: 0.82095575, y: -0.15508394, z: 0.46820873, w: 0.28768247}
-      scale: {x: 1.0000002, y: 0.9999998, z: 1.0000002}
-    - name: right_toe_joint
-      parentName: right_heel_joint
-      position: {x: -0.0000000013690441, y: 0.0042906776, z: -0.0000000012665987}
-      rotation: {x: -0.44295174, y: 0.5332122, z: -0.39412582, w: 0.6034429}
-      scale: {x: 1.0000006, y: 1.0000001, z: 1.0000008}
-    - name: right_toe_joint_end
-      parentName: right_toe_joint
-      position: {x: -0, y: 0.0011207435, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
+    skeleton: []
     armTwist: 0.5
     foreArmTwist: 0.5
     upperLegTwist: 0.5
@@ -1346,7 +1149,7 @@ ModelImporter:
     globalScale: 1
     rootMotionBoneName: root
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1

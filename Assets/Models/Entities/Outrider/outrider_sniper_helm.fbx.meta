@@ -3,7 +3,12 @@ guid: 17717ba567933894ea0a417d5e90f83d
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: SniperHelm_diff
+    second: {fileID: 2100000, guid: 866f82e57dc08b44cb2c0e98682d398b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
