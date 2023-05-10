@@ -6,9 +6,10 @@ public class PlayerController : MonoBehaviour
 {
     private float gravity = -55f;
     private float density = 10f;
-    private float drag = 0.004f;                         //<----- Drag for running or jetting above 10 meters
-    private float airCushionDrag = 0.00275f;             //<----- this is probably what the rigidbody drag should be when in the air between 0-10 meters from the ground
-    private float airCushionHeight = 10.0f;              //<----- this is probably the height at which the airCushionDrag stops being applied
+    private float drag = 0.004f;                        
+    private float airCushionDrag = 0.00275f;             
+    private float airCushionHeight = 0.1f;    
+    private float airCushionForceScale = 10f;          
 
     private float horizontalJetResistance = 0.0017f;
     private float horizontalJetResistanceFactor = 1.8f;
@@ -42,6 +43,7 @@ public class PlayerController : MonoBehaviour
     private float jetAirMoveMaxSpeed = 1000;
     private float jetAirMoveMaxAccelFactor = 1.5f;
 
+    private float jetSkateForce = 3125f;
     private float jetSkateMinSpeed = 10;
     private float jetSkateMaxSpeed = 1000;
     private float jetSkateMaxAccelFactor = 3;
@@ -95,7 +97,6 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
         HandleRotation();
         contactPoints.Clear();
-        lastVelocity = rb.velocity;
         lastPosition = transform.position;
     }
 
@@ -118,25 +119,60 @@ public class PlayerController : MonoBehaviour
         playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
 
         Vector3 currentVelocity = rb.velocity;
-        Vector3 currentVelocityLocalSpace = transform.InverseTransformDirection(currentVelocity);
-        float currentHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude;
-        float currentVerticleMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude;
+        // Vector3 currentVelocityLocalSpace = transform.InverseTransformDirection(currentVelocity);
+        float currentHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude + 0.0001f;
+        float currentVerticleMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude + 0.0001f;
 
-        // Apply gravity
-        Vector3 accumulatedVelocityChanges = Vector3.zero;
-        accumulatedVelocityChanges += Vector3.up * gravity * Time.fixedDeltaTime;
+        // // Add horizontal and verticle resist speeds
+        // if (currentHorizontalMagnitude > horizontalResistSpeed)
+        // {
+        //     float speedCap = currentHorizontalMagnitude;
+        //     if (speedCap > horizontalMaxSpeed)
+        //         speedCap = horizontalMaxSpeed;
+        //     speedCap -= horizontalResistFactor * Time.fixedDeltaTime * (speedCap - horizontalResistSpeed);
+        //     float scale = speedCap / currentHorizontalMagnitude;
+        //     rb.velocity = new Vector3(rb.velocity.x * scale, rb.velocity.y, rb.velocity.z * scale);
+        // }
+        // Vector3 verticleVelocityDirection = Vector3.Project(currentVelocity, Vector3.up).normalized;
+        // bool goingUp = verticleVelocityDirection.y > 0;
+        // float verticleMaxSpeed = goingUp ? upMaxSpeed : downMaxSpeed;
+        // float verticleResistSpeed = goingUp ? upResistSpeed : downResistSpeed;
+        // float verticleResistFactor = goingUp ? upResistFactor : downResistFactor;
+        // if (currentVerticleMagnitude > verticleResistSpeed)
+        // {
+        //     if (currentVerticleMagnitude > verticleMaxSpeed)
+        //         rb.velocity = new Vector3(rb.velocity.x, verticleMaxSpeed, rb.velocity.z);
+        //     rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y - verticleResistFactor * Time.fixedDeltaTime * (rb.velocity.y - verticleResistSpeed), rb.velocity.z);
+        // }
+
+        // Get updated velocity values after applying resist and drag forces
+        currentVelocity = rb.velocity;
+        Vector3 acceleration = (currentVelocity - lastVelocity) / Time.fixedDeltaTime;
+        currentHorizontalMagnitude = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).magnitude + 0.0001f;
+        currentVerticleMagnitude = Vector3.Project(currentVelocity, Vector3.up).magnitude + 0.0001f;
+        float currentAccHorizontalMagnitude = Vector3.ProjectOnPlane(acceleration, Vector3.up).magnitude + 0.0001f;
+        float currentAccVerticleMagnitude = Vector3.Project(acceleration, Vector3.up).magnitude + 0.0001f;
+        // Debug.Log("current: " + currentVelocity + " last: " + lastVelocity + " acc: " + acceleration + " horz: " + currentHorizontalMagnitude + " vert: " + currentVerticleMagnitude + " acc horz: " + currentAccHorizontalMagnitude + " acc vert: " + currentAccVerticleMagnitude);
+
+        // Apply Drag
+        // rb.velocity -= rb.velocity * drag * Time.fixedDeltaTime;
 
         // Get distance to ground
         RaycastHit hit;
-        bool didHit = Physics.Raycast(new Ray(transform.position, Vector3.down), out hit);
-        float distanceToGround = didHit ? hit.distance : Mathf.Infinity;
-
+        bool didHit = Physics.Raycast(
+            new Ray(
+                transform.position + Vector3.up * (playerCollider.bounds.size.y/2f + 0.01f),
+                Vector3.down
+            ),
+        out hit);
+        float distanceToGround = didHit ? hit.distance - playerCollider.bounds.size.y/2f : Mathf.Infinity;
+        if (distanceToGround < 0) distanceToGround = 0;
         
         // Get normal of ground below player
-        // TODO: Use Contact Points to get ground data
-        Vector3 groundNormal = Vector3.up;
+        Vector3 groundNormal = Vector3.zero;
         Vector3 groundPoint = Vector3.zero;
-        bool isGrounded = contactPoints.Count > 0 || distanceToGround < 2.3f;
+        bool isGrounded = contactPoints.Count > 0;
+        // bool isGrounded = contactPoints.Count > 0 || distanceToGround < 2.3f;
         if (isGrounded)
         {
             // Get average normal of all contact points
@@ -149,6 +185,10 @@ public class PlayerController : MonoBehaviour
             groundPoint /= contactPoints.Count;
             lastKnownGroundedPoint = groundPoint;
         }
+        else
+        {
+            groundNormal = Vector3.up;
+        }
         // else
         // {
         //     // If not grounded, use last known ground point to get ground normal
@@ -156,104 +196,153 @@ public class PlayerController : MonoBehaviour
         //     groundNormal = (transform.position - groundPoint).normalized;
         // }
 
-        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized;
 
-        // Run and Air Control Movement
-        if (isMoving && (!isGrounded || (isGrounded && !isSkiing)))
+        // Apply gravity
+        Vector3 accumulatedVelocityChanges = Vector3.zero;
+
+        float gravityForce = gravity;
+        // if (isSkiing && distanceToGround <= (airCushionHeight * 2))
+        // {
+        //     gravityForce += -gravity + (airCushionForceScale * airCushionHeight) + (airCushionForceScale * (airCushionHeight - distanceToGround));
+        // }
+        accumulatedVelocityChanges += Vector3.up * gravityForce * Time.fixedDeltaTime;
+
+
+        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized;
+        // Debug.Log("Movement Direction: " + movementDirection + " Adjusted: " + movementDirectionAdjusted + " Ground Normal: " + groundNormal + " Is Grounded: " + isGrounded + " Distance to Ground: " + distanceToGround);
+
+        // Get speed for given direction (m/s)
+        float moveSpeed = 0f;
+        if (isMoving)
         {
-            // Get speed for given direction (m/s)
-            float moveSpeed = 0f;
             if (Mathf.Abs(movement.x) >= Mathf.Abs(movement.z)) moveSpeed = maxRunSideSpeed;
             else moveSpeed = movement.z >= 0 ? maxRunForwardSpeed : maxRunBackwardSpeed;
+        }
 
-            // Caclulate velocity change vector
-            float maxAcc = (runForce / mass) * Time.fixedDeltaTime;
-            if (isGrounded)
+        // Run Movement
+        if (isGrounded && !isSkiing)
+        {
+            Vector3 inputAcc = movementDirectionAdjusted * moveSpeed;
+            // Vector3 inputAcc = movementDirectionAdjusted * (moveSpeed / movementDirectionAdjusted.magnitude);
+
+            // Check the angle of the surface to see if it can be run on
+            float angle = Vector3.Angle(Vector3.up, movementDirectionAdjusted);
+            bool canMove = 90 - angle < maxRunUpSurfaceAngle;
+
+            if (canMove)
             {
-                Vector3 inputAcc = movementDirectionAdjusted * (moveSpeed / movementDirectionAdjusted.magnitude);
-
-                // Check the angle of the surface to see if it can be run on
-                float angle = Vector3.Angle(Vector3.up, movementDirectionAdjusted);
-                bool canMove = 90 - angle < maxRunUpSurfaceAngle;
-
-                if (canMove)
-                {
-                    inputAcc -= (currentVelocity + accumulatedVelocityChanges);
-                    float inputSpeed = inputAcc.magnitude;
-                    if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
-                    accumulatedVelocityChanges += inputAcc;
-                }
-            }
-            else
-            {
-                Vector3 inputAcc = movementDirection * (moveSpeed / movementDirection.magnitude);
-
-                inputAcc -= accumulatedVelocityChanges;
+                inputAcc -= (currentVelocity + accumulatedVelocityChanges);
                 float inputSpeed = inputAcc.magnitude;
-                inputAcc.y = 0;
-                inputAcc.x *= airControl;
-                inputAcc.z *= airControl;
-                maxAcc *= 0.3f;
+                float maxAcc = (runForce / mass) * Time.fixedDeltaTime;
                 if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+                Debug.Log(inputAcc.magnitude);
                 accumulatedVelocityChanges += inputAcc;
             }
         }
+        // Air Control Movement
+        // else if (airControl > 0.0f)
+        // {
+        //     Vector3 inputAcc = movementDirection * moveSpeed;
+        //     // Vector3 inputAcc = movementDirection * (moveSpeed / movementDirection.magnitude);
 
-        // Jumping Movement
-        // TODO: Add jump force to accumulatedVelocityChanges
+        //     inputAcc -= accumulatedVelocityChanges;
+        //     inputAcc.y = 0;
+        //     inputAcc.x *= airControl;
+        //     inputAcc.z *= airControl;
+        //     float maxAcc = (runForce / mass) * Time.fixedDeltaTime * 0.3f;
+        //     float inputSpeed = inputAcc.magnitude;
+        //     if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+        //     accumulatedVelocityChanges += inputAcc;
+        // }
 
         // Skiing and Jetting Movement
         // if (isSkiing)
         // {
 
+        //     float maxAcc = 0f;
+        //     Vector3 inputAcc = Vector3.zero;
+
+        //     // Skiing
+        //     // if (isGrounded)
+        //     // {
+        //     //     // Calculate speed scale to multiply the base speed by
+        //     //     float speedScale = currentHorizontalMagnitude;
+        //     //     speedScale = (speedScale <= jetSkateMinSpeed) ? 1 : 1 - (speedScale - jetSkateMinSpeed) / (jetSkateMaxSpeed - jetSkateMinSpeed);
+
+        //     //     // TODO: Not sure if this is where jetSkateMaxAccelFactor should be applied
+        //     //     maxAcc = (jetSkateForce / mass) * Time.fixedDeltaTime;
+
+        //     //     float accCap = currentAccHorizontalMagnitude;
+        //     //     if (accCap > maxAcc) accCap = maxAcc;
+        //     //     accCap -= jetSkateMaxAccelFactor * Time.fixedDeltaTime * accCap;
+        //     //     float scale = accCap / currentAccHorizontalMagnitude;
+        //     //     maxAcc *= scale;
+
+        //     //     // TODO: Not sure if this is where speedScale should be applied
+        //     //     inputAcc = movementDirection * moveSpeed * speedScale;
+        //     // }
+        //     // Jetting
+        //     // else
+        //     // {
+        //     //     // Calculate speed scale to multiply the base speed by
+        //     //     float speedScale = currentHorizontalMagnitude;
+        //     //     speedScale = (speedScale <= jetAirMoveMinSpeed) ? 1 : 1 - (speedScale - jetAirMoveMinSpeed) / (jetAirMoveMaxSpeed - jetAirMoveMinSpeed);
+
+        //     //     maxAcc = (horizontalJetForce / mass) * Time.fixedDeltaTime;
+
+        //     //     float accCap = currentAccHorizontalMagnitude;
+        //     //     if (accCap > maxAcc) accCap = maxAcc;
+        //     //     accCap -= jetAirMoveMaxAccelFactor * Time.fixedDeltaTime * accCap;
+        //     //     float scale = accCap / currentAccHorizontalMagnitude;
+        //     //     maxAcc *= scale;
+
+        //     //     inputAcc = movementDirection * moveSpeed * speedScale;
+        //     // }
+            
+        //     // F32 speedCap = hvel;
+        //     // if(speedCap > mDataBlock->horizMaxSpeed)
+        //     //     speedCap = mDataBlock->horizMaxSpeed;
+        //     // speedCap -= mDataBlock->horizResistFactor * TickSec * (speedCap - mDataBlock->horizResistSpeed);
+        //     // F32 scale = speedCap / hvel;
+        //     // mVelocity.x *= scale;
+        //     // mVelocity.y *= scale;
+
+            
+        //     // Vector3 inputAcc = direction * ((moveSpeed) / direction.magnitude) * speedScale;
+        //     // inputAcc -= accumulatedVelocityChanges;
+
+        //     // float inputSpeed = inputAcc.magnitude;
+        //     // if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+
+        //     accumulatedVelocityChanges += inputAcc;
+
+
+        //     // Kinda cool ngl...
+        //     // if (len > 0.0f)
+        //     //     direction *= 1 / len;
+
+        //     // // If we are facing into the surface jump up, otherwise
+        //     // // jump away from surface.
+        //     // float dot = Vector3.Dot(direction, groundNormal);
+        //     // float impulse = jetSkateForce / mass;
+
+        //     // if (dot <= 0)
+        //     //     accumulatedVelocityChanges += groundNormal * impulse * speedScale;
+        //     // else
+        //     // {
+        //     //     accumulatedVelocityChanges += direction * impulse * dot;
+        //     //     accumulatedVelocityChanges += groundNormal * impulse * speedScale;
+        //     // }
+
         // }
 
+        // Jumping Movement
+        // TODO: Add jump force to accumulatedVelocityChanges
+
+        // Debug.Log(accumulatedVelocityChanges.magnitude);
+        lastVelocity = rb.velocity;
         if (accumulatedVelocityChanges.magnitude > 0.0f)
             rb.velocity += accumulatedVelocityChanges;
-
-        // // TODO: Add horizontal and verticle resist speeds
-        // /*
-        // if(hvel > mDataBlock->horizResistSpeed)
-        // {
-        //     F32 speedCap = hvel;
-        //     if(speedCap > mDataBlock->horizMaxSpeed)
-        //         speedCap = mDataBlock->horizMaxSpeed;
-        //     speedCap -= mDataBlock->horizResistFactor * TickSec * (speedCap - mDataBlock->horizResistSpeed);
-        //     F32 scale = speedCap / hvel;
-        //     mVelocity.x *= scale;
-        //     mVelocity.y *= scale;
-        // }
-        // if(mVelocity.z > mDataBlock->upResistSpeed)
-        // {
-        //     if(mVelocity.z > mDataBlock->upMaxSpeed)
-        //         mVelocity.z = mDataBlock->upMaxSpeed;
-        //     mVelocity.z -= mDataBlock->upResistFactor * TickSec * (mVelocity.z - mDataBlock->upResistSpeed);
-        // }
-        // */
-        // if (currentHorizontalMagnitude > horizontalMaxSpeed)
-        // {
-        //     float speedCap = currentHorizontalMagnitude;
-        //     if (speedCap > horizontalMaxSpeed)
-        //         speedCap = horizontalMaxSpeed;
-        //     speedCap -= horizontalResistFactor * Time.fixedDeltaTime * (speedCap - horizontalResistSpeed);
-        //     float scale = speedCap / currentHorizontalMagnitude;
-        //     rb.velocity = new Vector3(rb.velocity.x * scale, rb.velocity.y, rb.velocity.z * scale);
-        // }
-        // // Get direction of verticle velocity
-        // Vector3 verticleVelocityDirection = Vector3.Project(currentVelocity, Vector3.up).normalized;
-        // bool goingUp = verticleVelocityDirection.y > 0;
-        // float verticleMaxSpeed = goingUp ? upMaxSpeed : downMaxSpeed;
-        // float verticleResistSpeed = goingUp ? upResistSpeed : downResistSpeed;
-        // float verticleResistFactor = goingUp ? upResistFactor : downResistFactor;
-        // if (currentVerticleMagnitude > verticleMaxSpeed)
-        // {
-        //     if (currentVerticleMagnitude > verticleMaxSpeed)
-        //         rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, verticleMaxSpeed);
-        //     rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, rb.velocity.z - verticleResistFactor * Time.fixedDeltaTime * (rb.velocity.z - verticleResistSpeed));
-        // }
-
-        // Apply Drag
-        rb.velocity -= rb.velocity * drag * Time.fixedDeltaTime;
     }
 
     private void OLD_HandleMovement()
