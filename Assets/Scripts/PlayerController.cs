@@ -254,20 +254,20 @@ public class PlayerController : MonoBehaviour
             }
         }
         // Air Control Movement
-        // else if (airControl > 0.0f)
-        // {
-        //     Vector3 inputAcc = movementDirection * moveSpeed;
-        //     // Vector3 inputAcc = movementDirection * (moveSpeed / movementDirection.magnitude);
+        else if (airControl > 0.0f)
+        {
+            Vector3 inputAcc = movementDirection * moveSpeed;
+            // Vector3 inputAcc = movementDirection * (moveSpeed / movementDirection.magnitude);
 
-        //     inputAcc -= accumulatedVelocityChanges;
-        //     inputAcc.y = 0;
-        //     inputAcc.x *= airControl;
-        //     inputAcc.z *= airControl;
-        //     float inputSpeed = inputAcc.magnitude;
-        //     float maxAcc = (runForce / mass) * Time.fixedDeltaTime * 0.3f;
-        //     if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
-        //     accumulatedVelocityChanges += inputAcc;
-        // }
+            inputAcc -= accumulatedVelocityChanges;
+            inputAcc.y = 0;
+            inputAcc.x *= airControl;
+            inputAcc.z *= airControl;
+            float inputSpeed = inputAcc.magnitude;
+            float maxAcc = (runForce / mass) * Time.fixedDeltaTime * 0.3f;
+            if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
+            accumulatedVelocityChanges += inputAcc;
+        }
 
         // Skiing and Jetting Movement
         if (isSkiing)
