@@ -292,7 +292,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29aa419a3ed14f4698e76083783efd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeScale: 1
+  constantTimeScale: 1
+  slowDownTimeScale: 0.05
 --- !u!4 &451346374
 Transform:
   m_ObjectHideFlags: 0
@@ -967,6 +968,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2714090013339421920, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: hoverStrength
+      value: 6500
+      objectReference: {fileID: 0}
+    - target: {fileID: 2714090013339421920, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: hoverDampening
+      value: 6500
+      objectReference: {fileID: 0}
     - target: {fileID: 4816535711594619940, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_RootOrder
       value: 12
@@ -1014,6 +1023,10 @@ PrefabInstance:
     - target: {fileID: 4816535711594619941, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5248141138229305080, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}

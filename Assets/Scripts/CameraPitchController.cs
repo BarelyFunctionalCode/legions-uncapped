@@ -9,16 +9,25 @@ public class CameraPitchController : MonoBehaviour
 
     private PlayerControls playerControls;
 
+    bool hasFocus = false;
+
     void Awake()
     {
         playerControls = new PlayerControls();
     }
 
+    void OnApplicationFocus(bool tempHasFocus)
+    {
+        if (tempHasFocus) Cursor.lockState = CursorLockMode.Locked;
+        hasFocus = tempHasFocus;
+    }
+    
     void OnEnable() { playerControls.Enable(); }
     void OnDisable() { playerControls.Disable(); }
 
     void FixedUpdate()
     {
+        if (!hasFocus) return;
         Vector2 rotationInput = playerControls.Movement.LookVector.ReadValue<Vector2>();
         Vector3 rotation = new Vector3(-rotationInput.y, 0f, 0f);
         rotation *= rotationSpeed * Time.fixedDeltaTime;
