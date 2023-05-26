@@ -71,6 +71,24 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TimeSlow"",
+                    ""type"": ""Button"",
+                    ""id"": ""6faec846-c61a-4b4a-8cec-bc4c6d20197f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleSki"",
+                    ""type"": ""Button"",
+                    ""id"": ""8aeb1a7d-0d65-4b7b-9ded-fcd0806676c4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -172,6 +190,28 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""DownJet"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""07e9e91c-b557-45a1-b8ac-6ea2632e6265"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TimeSlow"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fafa3d25-a9e9-4ae1-9ba7-98d5a3c8c613"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleSki"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -185,6 +225,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Movement_MoveVector = m_Movement.FindAction("MoveVector", throwIfNotFound: true);
         m_Movement_LookVector = m_Movement.FindAction("LookVector", throwIfNotFound: true);
         m_Movement_DownJet = m_Movement.FindAction("DownJet", throwIfNotFound: true);
+        m_Movement_TimeSlow = m_Movement.FindAction("TimeSlow", throwIfNotFound: true);
+        m_Movement_ToggleSki = m_Movement.FindAction("ToggleSki", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -249,6 +291,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Movement_MoveVector;
     private readonly InputAction m_Movement_LookVector;
     private readonly InputAction m_Movement_DownJet;
+    private readonly InputAction m_Movement_TimeSlow;
+    private readonly InputAction m_Movement_ToggleSki;
     public struct MovementActions
     {
         private @PlayerControls m_Wrapper;
@@ -258,6 +302,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @MoveVector => m_Wrapper.m_Movement_MoveVector;
         public InputAction @LookVector => m_Wrapper.m_Movement_LookVector;
         public InputAction @DownJet => m_Wrapper.m_Movement_DownJet;
+        public InputAction @TimeSlow => m_Wrapper.m_Movement_TimeSlow;
+        public InputAction @ToggleSki => m_Wrapper.m_Movement_ToggleSki;
         public InputActionMap Get() { return m_Wrapper.m_Movement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -282,6 +328,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @DownJet.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
                 @DownJet.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
                 @DownJet.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
+                @TimeSlow.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnTimeSlow;
+                @TimeSlow.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnTimeSlow;
+                @TimeSlow.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnTimeSlow;
+                @ToggleSki.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnToggleSki;
+                @ToggleSki.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnToggleSki;
+                @ToggleSki.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnToggleSki;
             }
             m_Wrapper.m_MovementActionsCallbackInterface = instance;
             if (instance != null)
@@ -301,6 +353,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @DownJet.started += instance.OnDownJet;
                 @DownJet.performed += instance.OnDownJet;
                 @DownJet.canceled += instance.OnDownJet;
+                @TimeSlow.started += instance.OnTimeSlow;
+                @TimeSlow.performed += instance.OnTimeSlow;
+                @TimeSlow.canceled += instance.OnTimeSlow;
+                @ToggleSki.started += instance.OnToggleSki;
+                @ToggleSki.performed += instance.OnToggleSki;
+                @ToggleSki.canceled += instance.OnToggleSki;
             }
         }
     }
@@ -312,5 +370,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnMoveVector(InputAction.CallbackContext context);
         void OnLookVector(InputAction.CallbackContext context);
         void OnDownJet(InputAction.CallbackContext context);
+        void OnTimeSlow(InputAction.CallbackContext context);
+        void OnToggleSki(InputAction.CallbackContext context);
     }
 }
