@@ -254,7 +254,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 accumulatedVelocityChanges = Vector3.zero;
 
-        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized;
+        Vector3 movementDirectionAdjusted = movementDirection.magnitude > 0.0f ? Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized : groundNormal; // maybe instead do Vector3.up
         // Debug.Log("Movement Direction: " + movementDirection + " Adjusted: " + movementDirectionAdjusted + " Ground Normal: " + groundNormal + " Is Grounded: " + isGrounded + " Distance to Ground: " + distanceToGround);
 
 
@@ -379,8 +379,8 @@ public class PlayerController : MonoBehaviour
                 if (isMoving || !isGrounded)
                 {
                     float jetDirectionalAcc = horizontalJetForce * airMoveSpeed;
-                    accumulatedVelocityChanges.x += jetDirectionalAcc * movementDirection.x;
-                    accumulatedVelocityChanges.z += jetDirectionalAcc * movementDirection.z;
+                    accumulatedVelocityChanges.x += jetDirectionalAcc * movementDirectionAdjusted.x;
+                    accumulatedVelocityChanges.z += jetDirectionalAcc * movementDirectionAdjusted.z;
                 }
 
                 // Jet Up/Down Control
@@ -434,6 +434,12 @@ public class PlayerController : MonoBehaviour
 
         // Apply Resistance Values
         rb.AddForce(-rb.velocity + new Vector3(rb.velocity.x * horizontalResistanceFactor, rb.velocity.y * verticalResistanceFactor, rb.velocity.z * horizontalResistanceFactor), ForceMode.VelocityChange);
+
+
+        Vector3 debugHorVel = -Vector3.ProjectOnPlane(rb.velocity, Vector3.up) + new Vector3(rb.velocity.x * horizontalResistanceFactor, 0, rb.velocity.z * horizontalResistanceFactor);
+        Vector3 debugVertVel = -Vector3.Project(rb.velocity, Vector3.up) + new Vector3(0, rb.velocity.y * verticalResistanceFactor, 0);
+        Debug.DrawRay(playerPositionCenter + Vector3.up * 2f + transform.forward * 2f, debugHorVel, Color.yellow, 10.0f);
+        Debug.DrawRay(playerPositionCenter + Vector3.up * 2f + transform.forward * 2f, debugVertVel, Color.white, 10.0f);
 
         // Apply Final Acceleration forces
         if (accumulatedVelocityChanges.magnitude > 0.0f)
