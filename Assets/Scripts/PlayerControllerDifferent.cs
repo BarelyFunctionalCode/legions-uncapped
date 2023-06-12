@@ -7,7 +7,7 @@ public class PlayerControllerDifferent : MonoBehaviour
     private float drag = 0.004f;                        
     private float airCushionDrag = 0.00275f;             
     private float airCushionHeight = 10f;    
-    private float maxRunUpSurfaceAngle = 50f; 
+    // private float maxRunUpSurfaceAngle = 50f; 
     private float mass = 75f;
 
     private float rotationSpeed = 20f;
@@ -27,17 +27,7 @@ public class PlayerControllerDifferent : MonoBehaviour
 
     [Header("Hovering")]
     [Range(0.0f, 2.0f)]
-    [SerializeField ] private float hoverHeightMax = 0.6f;
-    // [Range(0.0f, 100.0f)]
-    // [SerializeField ] private float hoverStrength = 61;
-    [SerializeField ] private AnimationCurve hoverCurve;
-    // [Range(0.0f, 50.0f)]
-    // [SerializeField ] private float hoverBaseForce = 30;
-
-    // [Range(0.0f, 300.0f)]
-    // [SerializeField ] private float dampeningStrength = 150;
-    [SerializeField ] private AnimationCurve dampeningCurve;
-
+    [SerializeField ] private float hoverHeightMax = 0.2f;
 
     [Header("Skiing")]
     [Range(0.0f, 300f)]
@@ -72,14 +62,10 @@ public class PlayerControllerDifferent : MonoBehaviour
 
     private Vector3 lastKnownSurfaceNormal = Vector3.zero;
     private Vector3 lastKnownSurfacePoint = Vector3.zero;
-    private float lastKnownSurfaceCounter = 0;
-    private float lastSurfaceDistance = 0.0f;
 
     [Header("Collision Detection")]
     [SerializeField ] private LayerMask ignoreLayers;
 
-    private Vector3 lastPlayerPosition = Vector3.zero;
-    private Vector3 lastVelocity = Vector3.zero;
 
     bool skiToggleInput = false;
     bool skiToggle = false;
@@ -120,7 +106,6 @@ public class PlayerControllerDifferent : MonoBehaviour
     {
         HandleMovement();
         if (hasFocus) HandleRotation();
-        lastVelocity = rb.velocity;
     }
 
     private void HandleMovement()
@@ -158,6 +143,8 @@ public class PlayerControllerDifferent : MonoBehaviour
         // Calculate terrain data from collision points
         if (terrainContactPoints.Count > 0)
         {
+
+            // Get average surface normal and point from all contact points
             surfaceNormal = Vector3.zero;
             int i = 0;
             foreach (ContactPoint contact in terrainContactPoints)
@@ -165,22 +152,17 @@ public class PlayerControllerDifferent : MonoBehaviour
                 // Debug.DrawRay(contact.point - contact.normal * contact.separation, contact.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i/(float)terrainContactPoints.Count)), 5.0f);
                 surfaceNormal += contact.normal;
                 surfacePoint += (contact.point - contact.normal * contact.separation);
-                distanceToSurface = Mathf.Min(distanceToSurface, Mathf.Max(Vector3.Distance(surfacePoint, playerCollider.ClosestPoint(surfacePoint)), 0.0f));
                 i++;
             }
             surfaceNormal /= terrainContactPoints.Count;
             surfacePoint /= terrainContactPoints.Count;
-            // distanceToSurface += 0.6f; // difference between inner and outer radius of capsule collider
-            // distanceToSurface = Mathf.Max(distanceToSurface, 0.0f);
 
-
-            // Do a bunch of raycasts at player height intervals to get a more accurate surface normal
+            // Do a bunch of raycasts at player height intervals to get a more accurate surface normal and distance to surface
             float playerHeight = playerCollider.bounds.size.y;
             Vector3 playerBottom = playerPositionCenter - Vector3.up * playerHeight / 2.0f;
             Vector3 playerTop = playerPositionCenter + Vector3.up * playerHeight / 2.0f;
             Vector3 checkDirection = -surfaceNormal;
 
-            print("testing");
             for (i = 0; i < surfaceDetectionResolution; i++)
             {
                 Vector3 playerHeightPoint = Vector3.Lerp(playerTop, playerBottom, (float)i / (float)surfaceDetectionResolution);
@@ -199,7 +181,6 @@ public class PlayerControllerDifferent : MonoBehaviour
                     Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
                     Debug.DrawRay(playerCollider.ClosestPoint(hit.point), Vector3.up, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
                     float hitDistance = Vector3.Distance(hit.point, playerCollider.ClosestPoint(hit.point));
-                    print(hitDistance);
                     if (hitDistance < distanceToSurface)
                     {
                         surfaceNormal = hit.normal;
@@ -230,47 +211,19 @@ public class PlayerControllerDifferent : MonoBehaviour
 
                 distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, playerCollider.ClosestPoint(surfacePoint)), 0.0f);
 
-                // Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.cyan, 5.0f);
-                // Debug.Log(hit.transform.gameObject.name + " " + hit.normal + " " + hit.point + " " + hit.distance);
+                Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.cyan, 5.0f);
             }
-
-            // // Raycast looking towards player velocity direction
-            // if (rb.velocity.magnitude > 0.0f)
-            // {
-            //     Vector3 raycastDirection = (rb.velocity.normalized * 0.5f) + (-lastKnownSurfaceNormal * 0.5f);
-            //     didHit = Physics.Raycast(
-            //         new Ray(
-            //             playerPositionCenter,
-            //             raycastDirection
-            //         ),
-            //     out hit,
-            //     Mathf.Min(rb.velocity.magnitude * 0.2f, 2.0f));
-            //     if (didHit)
-            //     {
-            //         distanceToSurface = Mathf.Min(Vector3.Distance(hit.point, playerCollider.ClosestPoint(hit.point)), distanceToSurface);
-
-            //         surfaceNormal = (surfaceNormal + hit.normal) / 2.0f;
-            //         surfacePoint = (surfacePoint + hit.point) / 2.0f;
-
-            //         Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.magenta, 5.0f);
-            //     }
-            // }
         }
 
-        if (distanceToSurface < hoverHeightMax * 2.0f) // difference between inner and outer radius of capsule collider
+        if (distanceToSurface < hoverHeightMax * 2.0f)
         {
             isGrounded = true;
         }
-
-        // Vector3 playerPositionDelta = playerPositionCenter - lastPlayerPosition;
-        // lastSurfaceDistance = distanceToSurface + Vector3.Project(playerPositionDelta, -surfaceNormal).magnitude;
-        // Debug.Log(lastSurfaceDistance + " " + distanceToSurface + " " + Vector3.Dot(playerPositionDelta, surfaceNormal) + " " + playerPositionDelta + " " + surfaceNormal + " " + playerPositionCenter + " " + lastPlayerPosition);
 
         if (Vector3.Distance(lastKnownSurfaceNormal, surfaceNormal) > 0.00001f)
         {
             float surfaceNormalLerpFactor = Mathf.Clamp01((distanceToSurface - 1.0f) / 10.0f);
             lastKnownSurfaceNormal = Vector3.Lerp(surfaceNormal, Vector3.up, surfaceNormalLerpFactor);
-            // lastKnownSurfaceNormal = surfaceNormal;
         }
         if (Vector3.Distance(lastKnownSurfacePoint, surfacePoint) > 0.00001f) lastKnownSurfacePoint = surfacePoint;
 
@@ -293,6 +246,7 @@ public class PlayerControllerDifferent : MonoBehaviour
 
         Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, surfaceNormal).normalized;
 
+
         // Set animator values
         Vector3 animMovementDirectionNewY = Vector3.up * (isDownJetting ? -1f : (isUpJetting ? 1f : 0f));
         animMovementDirection = Vector3.Lerp(animMovementDirection, movement.normalized + animMovementDirectionNewY, Time.fixedDeltaTime * 10f);
@@ -309,37 +263,20 @@ public class PlayerControllerDifferent : MonoBehaviour
         // Skiing Movement
         if (isSkiing)
         {
-            // Vector3 velocityDelta = rb.velocity - lastVelocity;
 
-            // // Hover force that opposes gravity
-            // float hoverForce = hoverCurve.Evaluate(distanceToSurface/hoverHeightMax) * hoverStrength;
-
-            // // Dampening force
-            // float surfaceDistanceDelta = distanceToSurface - lastSurfaceDistance;
-            // float dampeningForce = dampeningCurve.Evaluate(surfaceDistanceDelta) * dampeningStrength / (1.0f + distanceToSurface);
-
-            // // Combining forces
-            // float combinedForce = Mathf.Max(hoverForce + dampeningForce, 0.0f);
-            // Vector3 combinedForceVector = combinedForce * surfaceNormal;
-
-            // rb.AddForce(combinedForceVector, ForceMode.Acceleration);
-
-            // --------------------------------------
-
+            // Hover Force
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
 
             Vector3 VelocityDirNoY = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
             float velocityDirIntoSurface = Vector3.Dot(VelocityDirNoY, surfaceNormal);
 
-            float forceX = 0.0f;
-            float forceY = 0.0f;
-            float forceZ = 0.0f;
+            Vector3 hoverForce = Vector3.zero;
 
             if (velocityDirIntoSurface > 0.0f)
             {
-                forceX = 0.0f - 2.0f * -55.0f * surfaceNormal.x * Time.fixedDeltaTime * hoverFactor;
-                forceY = 55.0f * Time.fixedDeltaTime * hoverFactor;
-                forceZ = 0.0f - 2.0f * -55.0f * surfaceNormal.z * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.x = 2.0f * Physics.gravity.magnitude * surfaceNormal.x * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.y = Physics.gravity.magnitude * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.z = 2.0f * Physics.gravity.magnitude * surfaceNormal.z * Time.fixedDeltaTime * hoverFactor;
             }
             else
             {
@@ -348,16 +285,13 @@ public class PlayerControllerDifferent : MonoBehaviour
                 Vector3 velocityDirOrUp = rb.velocity.magnitude > 0.0f ? rb.velocity.normalized : Vector3.up;
                 float negVelocityDirOrUpDotSurfaceNormal = Vector3.Dot(-velocityDirOrUp, surfaceNormal);
 
-                forceX = 0.0f - (adjustedSurfaceNormal.x - velocityDirOrUp.x * negVelocityDirOrUpDotSurfaceNormal * -1.0f) * 0.5f * -55.0f * Time.fixedDeltaTime * hoverFactor;
-                forceY = 55.0f * Time.fixedDeltaTime * hoverFactor;
-                forceZ = 0.0f - (adjustedSurfaceNormal.z - velocityDirOrUp.z * negVelocityDirOrUpDotSurfaceNormal * -1.0f) * 0.5f * -55.0f * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.x = (adjustedSurfaceNormal.x + velocityDirOrUp.x * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * Physics.gravity.magnitude * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.y = Physics.gravity.magnitude * Time.fixedDeltaTime * hoverFactor;
+                hoverForce.z = (adjustedSurfaceNormal.z + velocityDirOrUp.z * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * Physics.gravity.magnitude * Time.fixedDeltaTime * hoverFactor;
             }
 
-            Vector3 forceVector = new Vector3(forceX, forceY, forceZ);
-            rb.AddForce(forceVector, ForceMode.VelocityChange);
+            rb.AddForce(hoverForce, ForceMode.VelocityChange);
 
-            // Debug.DrawRay(playerPositionCenter, forceVector, Color.red, 10.0f);
-            print(distanceToSurface + " " + forceVector + " " + surfaceNormal);
 
             // Jetting Force
             Vector3 jetForce = Vector3.zero;
@@ -377,9 +311,6 @@ public class PlayerControllerDifferent : MonoBehaviour
 
             rb.AddForce(jetForce, ForceMode.Acceleration);
         }
-
-        lastPlayerPosition = playerPositionCenter;
-        lastSurfaceDistance = distanceToSurface;
     }
 
     private void HandleRotation()
