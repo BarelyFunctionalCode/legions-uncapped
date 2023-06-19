@@ -7,44 +7,13 @@ public class PlayerController : MonoBehaviour
     private float drag = 0.004f;                        
     private float airCushionDrag = 0.00275f;             
     private float airCushionHeight = 10f;    
-
-    private float horizontalJetResistance = 0.0017f;
-    private float horizontalJetResistanceFactor = 1.8f;
-    private float verticalJetResistance = 0.0006f;
-    private float verticalJetResistanceFactor = 1.8f;
-
-    private float runForce = 10000f;
-    private float maxRunForwardSpeed = 20f;
-    private float maxRunBackwardSpeed = 20f;
-    private float maxRunSideSpeed = 20f;
-    private float maxRunUpSurfaceAngle = 50f; 
-
-    // Forces used while jetting/skiing
-    private float horizontalJetForce = 3125f;
-    private float upJetForce = 7031.25f;
-    private float downJetForce = 5156.25f;
-
-    // Final Speed Caps
-    private float horizontalResistFactor = 0.3f;
-    private float horizontalResistSpeed = 100f;              // <---- I think this means that "at this speed, the player will be slowed down by the horizResistFactor"
-    private float horizontalMaxSpeed = 120f;
-    private float upResistFactor = 0.3f;
-    private float upResistSpeed = 85f;                  // <---- Same as above
-    private float upMaxSpeed = 115f;
-    private float downResistFactor = 0.1f;
-    private float downResistSpeed = 1000f;
-    private float downMaxSpeed = 1000f;                  //<---- Max speeds for each direction (velocity magnitude)
-
-    // Acceleration multipliers based on current speed
-    private float jetAirMoveMinSpeed = 5;
-    private float jetAirMoveMaxSpeed = 1000;
-    private float jetAirMoveMaxAccelFactor = 1.5f;
-    
+    // private float maxRunUpSurfaceAngle = 50f; 
     private float mass = 75f;
 
-    [SerializeField] private float rotationSpeed = 20f;
-    [SerializeField] private float rotationLimit = 20f;
+    private float rotationSpeed = 20f;
+    private float rotationLimit = 20f;
 
+    [Header("Physics")]
     [SerializeField] private PhysicMaterial skiMaterial;
     [SerializeField] private PhysicMaterial normalMaterial;
 
@@ -55,19 +24,48 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private Vector3 animMovementDirection = Vector3.zero;
 
-    [Range(0.0f, 1.0f)]
-    [SerializeField ] private float hoverHeightMax = 0.6f;
 
-    [Range(0.0f, 20000.0f)]
-    [SerializeField] private float hoverStrength = 65f;
+    [Header("Hovering")]
+    [Range(0.0f, 2.0f)]
+    [SerializeField ] private float hoverHeightMax = 0.2f;
 
-    [Range(0.0f, 20000.0f)]
-    [SerializeField] private float hoverDampening = 1000f;
+    [Header("Skiing")]
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float skiStrength = 40f;
 
-    private Vector3 lastKnownGroundedNormal = Vector3.zero;
-    private Vector3 lastKnownGroundedPoint = Vector3.zero;
-    private float lastKnownGroundCounter = 0;
-    private float lastGroundDistance = 0.0f;
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float resistSkiSpeed = 40f;
+
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float maxSkiSpeed = 120f;
+
+
+    [Header("Jetting")]
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float upJetStrength = 40f;
+
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float resistUpJetSpeed = 60f;
+
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float maxUpJetSpeed = 120f;
+
+    
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float downJetStrength = 40f;
+
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float resistDownJetSpeed = 60f;
+
+    [Range(0.0f, 300f)]
+    [SerializeField ] private float maxDownJetSpeed = 120f;
+
+    private Vector3 lastKnownSurfaceNormal = Vector3.zero;
+    private Vector3 lastKnownSurfacePoint = Vector3.zero;
+
+    [Header("Collision Detection")]
+    [SerializeField ] private LayerMask ignoreLayers;
+
 
     bool skiToggleInput = false;
     bool skiToggle = false;
@@ -82,7 +80,7 @@ public class PlayerController : MonoBehaviour
         rb.mass = mass;
         playerCollider = GetComponent<CapsuleCollider>();
         playerCollider.material = normalMaterial;
-        terrainDetector = GetComponentInChildren<TerrainDetector>();
+        terrainDetector = transform.parent.GetComponentInChildren<TerrainDetector>();
         animator = GetComponent<Animator>();
     }
 
@@ -135,113 +133,108 @@ public class PlayerController : MonoBehaviour
 
         Vector3 playerPositionCenter = playerCollider.bounds.center;
         
-        Vector3 groundNormal = Vector3.up;
-        Vector3 groundPoint = Vector3.zero;
-        float distanceToGround = Mathf.Infinity;
+        Vector3 surfaceNormal = Vector3.up;
+        Vector3 surfacePoint = Vector3.zero;
+
+        float distanceToSurface = Mathf.Infinity;
+
+        float surfaceDetectionResolution = 15f;
 
         // Calculate terrain data from collision points
         if (terrainContactPoints.Count > 0)
         {
-            groundNormal = Vector3.zero;
+
+            // Get average surface normal and point from all contact points
+            surfaceNormal = Vector3.zero;
             int i = 0;
             foreach (ContactPoint contact in terrainContactPoints)
             {
-                Debug.DrawRay(contact.point - contact.normal * contact.separation, contact.normal, Color.Lerp(Color.red, Color.green, ((float)i/(float)terrainContactPoints.Count)), 1.0f);
-                groundNormal += contact.normal;
-                groundPoint += (contact.point - contact.normal * contact.separation);
-                distanceToGround = Mathf.Min(distanceToGround, contact.separation);
+                // Debug.DrawRay(contact.point - contact.normal * contact.separation, contact.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i/(float)terrainContactPoints.Count)), 5.0f);
+                surfaceNormal += contact.normal;
+                surfacePoint += (contact.point - contact.normal * contact.separation);
                 i++;
             }
-            groundNormal /= terrainContactPoints.Count;
-            groundPoint /= terrainContactPoints.Count;
-            distanceToGround += 0.6f; // difference between inner and outer radius of capsule collider
-            // distanceToGround = Mathf.Clamp(distanceToGround, 0.0f, hoverHeightMax);
+            surfaceNormal /= terrainContactPoints.Count;
+            surfacePoint /= terrainContactPoints.Count;
 
-            lastKnownGroundedNormal = groundNormal;
-            lastKnownGroundedPoint = groundPoint;
+            // Do a bunch of raycasts at player height intervals to get a more accurate surface normal and distance to surface
+            float playerHeight = playerCollider.bounds.size.y;
+            Vector3 playerBottom = playerPositionCenter - Vector3.up * playerHeight / 2.0f;
+            Vector3 playerTop = playerPositionCenter + Vector3.up * playerHeight / 2.0f;
+            Vector3 checkDirection = -surfaceNormal;
 
-            float angle = Vector3.Angle(Vector3.up, groundNormal);
-            isGrounded = angle < maxRunUpSurfaceAngle;
+            for (i = 0; i < surfaceDetectionResolution; i++)
+            {
+                Vector3 playerHeightPoint = Vector3.Lerp(playerTop, playerBottom, (float)i / (float)surfaceDetectionResolution);
+                RaycastHit hit;
+                bool didHit = Physics.Raycast(
+                    new Ray(
+                        playerHeightPoint,
+                        checkDirection
+                    ),
+                    out hit,
+                    Mathf.Infinity,
+                    ~ignoreLayers
+                );
+                if (didHit)
+                {
+                    Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
+                    Debug.DrawRay(playerCollider.ClosestPoint(hit.point), Vector3.up, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
+                    float hitDistance = Vector3.Distance(hit.point, playerCollider.ClosestPoint(hit.point));
+                    if (hitDistance < distanceToSurface)
+                    {
+                        surfaceNormal = hit.normal;
+                        surfacePoint = hit.point;
+                        distanceToSurface = hitDistance;
+                    }
+                }
+            }
         }
         // Fall back to raycasting if no collision points
         else
         {
-            if (lastKnownGroundCounter < 0.5f)
-            {
-                lastKnownGroundCounter += Time.fixedDeltaTime;
-            }
-            else
-            {
-                lastKnownGroundCounter = 0.0f;
-                lastKnownGroundedNormal = Vector3.up;
-                lastKnownGroundedPoint = Vector3.zero;
-            }
-
+            // Raycast to last known ground location
             RaycastHit hit;
             bool didHit = Physics.Raycast(
                 new Ray(
                     playerPositionCenter,
-                    -lastKnownGroundedNormal
+                    -lastKnownSurfaceNormal
                 ),
-            out hit);
+                out hit,
+                Mathf.Infinity,
+                ~ignoreLayers
+            );
             if (didHit)
             {
-                distanceToGround = Vector3.Distance(hit.point, playerCollider.bounds.ClosestPoint(hit.point));
-                if (distanceToGround < 0.6f) // difference between inner and outer radius of capsule collider
-                {
-                    groundNormal = hit.normal;
-                    groundPoint = hit.point;
+                surfaceNormal = hit.normal;
+                surfacePoint = hit.point;
 
-                    lastKnownGroundedNormal = groundNormal;
-                    lastKnownGroundedPoint = groundPoint;
+                distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, playerCollider.ClosestPoint(surfacePoint)), 0.0f);
 
-                    isGrounded = true;
-                }
+                Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.cyan, 5.0f);
             }
         }
 
-        Debug.DrawRay(groundPoint, groundNormal, Color.blue, 5.0f);
+        if (distanceToSurface < hoverHeightMax * 2.0f)
+        {
+            isGrounded = true;
+        }
+
+        if (Vector3.Distance(lastKnownSurfaceNormal, surfaceNormal) > 0.00001f)
+        {
+            float surfaceNormalLerpFactor = Mathf.Clamp01((distanceToSurface - 1.0f) / 10.0f);
+            lastKnownSurfaceNormal = Vector3.Lerp(surfaceNormal, Vector3.up, surfaceNormalLerpFactor);
+        }
+        if (Vector3.Distance(lastKnownSurfacePoint, surfacePoint) > 0.00001f) lastKnownSurfacePoint = surfacePoint;
+
+        Debug.DrawRay(surfacePoint, surfaceNormal, Color.blue, 5.0f);
 
         bool isRunning = isGrounded && isMoving && !isSkiing;
 
 
-        // Apply Horizontal Resistance
-        float currentHorizontalMagnitude = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).magnitude + 0.0001f;
-        float horizontalResistAdjustment = 1.0f;
-        if (currentHorizontalMagnitude > horizontalResistSpeed * 3.0f)
-        {
-            float speedCap = horizontalMaxSpeed * 3.0f;
-            float adjustedSpeed = currentHorizontalMagnitude;
-            if (speedCap < currentHorizontalMagnitude)
-            {
-                adjustedSpeed = speedCap;
-            }
-            horizontalResistAdjustment = (adjustedSpeed - horizontalResistFactor * (adjustedSpeed - horizontalResistSpeed) * Time.fixedDeltaTime) /
-                                    currentHorizontalMagnitude;
-        }
-
-        // Apply Verticle Resistance
-        float currentVerticalMagnitude = rb.velocity.y + 0.0001f;
-        float verticalResistAdjustment = rb.velocity.y;
-        if (currentVerticalMagnitude > upResistSpeed)
-        {
-            float speedCap = upMaxSpeed;
-            if (currentVerticalMagnitude > upMaxSpeed) verticalResistAdjustment = upMaxSpeed;
-            verticalResistAdjustment = rb.velocity.y - upResistFactor * (rb.velocity.y - upResistSpeed) * Time.fixedDeltaTime;
-        }
-        if (currentVerticalMagnitude < -downResistSpeed) {
-            float speedCap = -downMaxSpeed;
-            if (currentVerticalMagnitude < -downMaxSpeed) verticalResistAdjustment = -downMaxSpeed;
-            verticalResistAdjustment = downResistFactor * (rb.velocity.y - downResistSpeed) * Time.fixedDeltaTime + rb.velocity.y;
-        }
-
-        // Apply Resistance Values
-        rb.AddForce(-rb.velocity + new Vector3(rb.velocity.x * horizontalResistAdjustment, verticalResistAdjustment, rb.velocity.z * horizontalResistAdjustment), ForceMode.VelocityChange);
-
-
         // Apply Drag
         float chosenDrag = 0.0f;
-        if (distanceToGround <= airCushionHeight)
+        if (distanceToSurface <= airCushionHeight)
         {
             chosenDrag = airCushionDrag;
         }
@@ -251,11 +244,7 @@ public class PlayerController : MonoBehaviour
         }
         rb.drag = chosenDrag;
 
-
-        Vector3 accumulatedVelocityChanges = Vector3.zero;
-
-        Vector3 movementDirectionAdjusted = movementDirection.magnitude > 0.0f ? Vector3.ProjectOnPlane(movementDirection, groundNormal).normalized : groundNormal; // maybe instead do Vector3.up
-        // Debug.Log("Movement Direction: " + movementDirection + " Adjusted: " + movementDirectionAdjusted + " Ground Normal: " + groundNormal + " Is Grounded: " + isGrounded + " Distance to Ground: " + distanceToGround);
+        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, surfaceNormal).normalized;
 
 
         // Set animator values
@@ -270,180 +259,68 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("isSkiing", isSkiing && (!isUpJetting && !isDownJetting));
         animator.SetBool("isJetting", isUpJetting || isDownJetting);
 
-        // Get speed for given direction (m/s)
-        float moveSpeed = 0f;
-        if (isMoving)
+
+        // Skiing Movement
+        if (isSkiing)
         {
-            if (Mathf.Abs(movement.x) >= Mathf.Abs(movement.z)) moveSpeed = maxRunSideSpeed;
-            else moveSpeed = movement.z >= 0 ? maxRunForwardSpeed : maxRunBackwardSpeed;
+
+            // Hovering
+            float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
+            float baseForce = Physics.gravity.magnitude * hoverFactor;
+
+            Vector3 lateralMovementDirection = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
+            print(lateralMovementDirection);
+            Vector3 lateralSurfaceDirection = Vector3.ProjectOnPlane(surfaceNormal, Vector3.up).normalized;
+            float slopeDirection = Vector3.Dot(lateralMovementDirection, lateralSurfaceDirection);
+
+
+            Vector3 hoverForce = Vector3.zero;
+
+            // Constant "up" force
+            hoverForce.y = baseForce;
+
+            // Going downhill
+            if (slopeDirection > 0.0f)
+            {
+                // Twice as much force in the direction of the slope
+                hoverForce.x = surfaceNormal.x * 2.0f * baseForce;
+                hoverForce.z = surfaceNormal.z * 2.0f * baseForce;
+            }
+            // Going uphill
+            else
+            {
+                // Adjusts the surface normal depending on how steep the slope is, steeper slopes make the normal more vertical
+                Vector3 adjustedSurfaceNormal = surfaceNormal - lateralMovementDirection * slopeDirection;
+
+                Vector3 latMoveDirOrUp = lateralMovementDirection.magnitude > 0.0f ? lateralMovementDirection : Vector3.up;
+                float negVelocityDirOrUpDotSurfaceNormal = Vector3.Dot(-latMoveDirOrUp, adjustedSurfaceNormal);
+
+                // Half as much force in the direction of the slope
+                hoverForce.x = (adjustedSurfaceNormal.x + latMoveDirOrUp.x * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
+                hoverForce.z = (adjustedSurfaceNormal.z + latMoveDirOrUp.z * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
+            }
+
+            rb.AddForce(hoverForce, ForceMode.Acceleration);
+
+
+            // Jetting Force
+            Vector3 jetForce = Vector3.zero;
+
+            // Horizontal Jetting Force
+            float currentLateralSpeed = Vector3.Dot(rb.velocity, movementDirection);
+            float skiResistMultiplier = Mathf.Max(1.0f - ((currentLateralSpeed - resistSkiSpeed) / (maxSkiSpeed - resistSkiSpeed)), 0.0f);
+            jetForce += movementDirection * skiStrength * skiResistMultiplier;
+
+            // Vertical Jetting Force
+            float currentUpSpeed = Vector3.Dot(rb.velocity, Vector3.up);
+            float verticalResistSpeed = currentUpSpeed > 0.0f ? resistUpJetSpeed : resistDownJetSpeed;
+            float verticalMaxSpeed = currentUpSpeed > 0.0f ? maxUpJetSpeed : maxDownJetSpeed;
+            float verticalJetResistMultiplier = Mathf.Max(1.0f - ((currentUpSpeed - verticalResistSpeed) / (verticalMaxSpeed - verticalResistSpeed)), 0.0f);
+            if (isUpJetting)jetForce += Vector3.up * upJetStrength * verticalJetResistMultiplier;
+            if (isDownJetting) jetForce += -Vector3.up * downJetStrength * verticalJetResistMultiplier;
+
+            rb.AddForce(jetForce, ForceMode.Acceleration);
         }
-
-
-        if (!isJetting && !isSkiing)
-        {
-            // Air Control
-            if (!isGrounded && isMoving)
-            {
-                Vector3 airControlAcc = movementDirection * (((moveSpeed / Time.fixedDeltaTime) * rb.mass) / movementDirection.magnitude);
-                airControlAcc.y = 0.0f;
-                float runSpeed = airControlAcc.magnitude;
-
-                float maxAirControlAcc = runForce * 0.3f;
-                
-                if (runSpeed > maxAirControlAcc)
-                {
-                    maxAirControlAcc /= runSpeed;
-                    airControlAcc.x *= maxAirControlAcc;
-                    airControlAcc.z *= maxAirControlAcc;
-                }
-                accumulatedVelocityChanges += airControlAcc;
-                Debug.Log(airControlAcc);
-            }
-            // Running
-            if (isRunning)
-            {
-                // Vector3 inputAcc = movementDirectionAdjusted * moveSpeed;
-                Vector3 inputAcc = movementDirectionAdjusted * (((moveSpeed / Time.fixedDeltaTime) * rb.mass) / movementDirectionAdjusted.magnitude);
-
-                // inputAcc -= new Vector3(rb.velocity.x, 0.0f, rb.velocity.z);
-                float inputSpeed = inputAcc.magnitude;
-                float maxAcc = runForce;
-                if (inputSpeed > maxAcc) inputAcc *= maxAcc / inputSpeed;
-                accumulatedVelocityChanges += inputAcc;
-                // TODO: Something to do with gravity?
-            }
-        }
-        else
-        {
-            // Skating, Jetting
-            // Apply Air Cushion and Skating?
-            if (isSkiing)
-            {
-                if (distanceToGround < hoverHeightMax)
-                {
-                    // Normalized distance between last frame and this frame if it is greater than 1.0f
-                    if (Mathf.Abs(lastGroundDistance - distanceToGround) > 1.0f)
-                    {
-                        lastGroundDistance = distanceToGround + (Mathf.Sign(lastGroundDistance - distanceToGround) * 0.5f);
-                    }
-
-                    // Spring force opposing gravity
-                    float hoverFactor = hoverStrength * ((hoverHeightMax - distanceToGround)/hoverHeightMax) +
-                        (hoverDampening * ((lastGroundDistance - distanceToGround)/hoverHeightMax));
-                    hoverFactor = Mathf.Max(hoverFactor, 0.0f);
-                    Debug.Log(hoverFactor + " " + distanceToGround + " " + lastGroundDistance + " " + hoverHeightMax + " " + hoverStrength + " " + hoverDampening);
-
-                    float velocityDirection = Vector3.Dot(groundNormal, Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized);
-
-                    Vector3 hoverForce = Vector3.zero;
-                    if (velocityDirection > 0.0f)
-                    {
-                        accumulatedVelocityChanges.x += hoverFactor * 2.0f * Vector3.ProjectOnPlane(groundNormal, Vector3.up).x;
-                        accumulatedVelocityChanges.z += hoverFactor * 2.0f * Vector3.ProjectOnPlane(groundNormal, Vector3.up).z;
-                        hoverForce = Vector3.up * hoverFactor;
-                        // hoverForce = Vector3.up * hoverFactor + Vector3.ProjectOnPlane(groundNormal, Vector3.up) * hoverFactor * 2.0f;
-                    }
-                    else
-                    {
-                        Vector3 velocityDirectionNoY = new Vector3(rb.velocity.normalized.x, 0, rb.velocity.normalized.z);
-                        Vector3 adjustedGround = groundNormal - velocityDirectionNoY * velocityDirection;
-                        float newVelocityDirection = Vector3.Dot(adjustedGround, -rb.velocity.normalized);
-                        Vector3 horizontalAdjustment = (adjustedGround - velocityDirectionNoY * newVelocityDirection * -1.0f) * hoverFactor * 0.5f;
-
-                        hoverForce = Vector3.up * hoverFactor;
-                        // hoverForce = Vector3.up * hoverFactor + horizontalAdjustment;
-                        accumulatedVelocityChanges.x += horizontalAdjustment.x;
-                        accumulatedVelocityChanges.z += horizontalAdjustment.z;
-                    }
-                    
-                    
-                    rb.AddForce(hoverForce);
-                }
-
-                Debug.DrawRay(playerPositionCenter + Vector3.up * 1.2f, Vector3.up * distanceToGround, Color.cyan, 10.0f);
-                lastGroundDistance = distanceToGround;
-            }
-        
-            // Jet Air Move
-            if (rb.velocity.magnitude < jetAirMoveMaxSpeed && (isSkiing || isJetting))
-            {
-                float airMoveSpeed = 1.0f;
-                if (rb.velocity.magnitude < jetAirMoveMinSpeed)
-                {
-                    airMoveSpeed = jetAirMoveMaxAccelFactor;
-                    if(rb.velocity.magnitude != 0.0f && jetAirMoveMinSpeed / rb.velocity.magnitude <= jetAirMoveMaxAccelFactor)
-                    {
-                        airMoveSpeed = jetAirMoveMinSpeed / rb.velocity.magnitude;
-                    }
-                }
-                if (isMoving || !isGrounded)
-                {
-                    float jetDirectionalAcc = horizontalJetForce * airMoveSpeed;
-                    accumulatedVelocityChanges.x += jetDirectionalAcc * movementDirectionAdjusted.x;
-                    accumulatedVelocityChanges.z += jetDirectionalAcc * movementDirectionAdjusted.z;
-                }
-
-                // Jet Up/Down Control
-                if (isUpJetting)
-                {
-                    float airCushionScale = 0.0f;
-                    if (airCushionHeight > 0.0f && distanceToGround <= airCushionHeight)
-                    {
-                        airCushionScale = (airCushionHeight - distanceToGround) / airCushionHeight;
-                    }
-                    float upAcc = upJetForce * airMoveSpeed;
-                    accumulatedVelocityChanges.y += upAcc * airCushionScale * 0.5f + upAcc;
-                }
-                else if (isDownJetting)
-                {
-                    accumulatedVelocityChanges.y -= downJetForce * airMoveSpeed;
-                }
-            }
-        }
-
-
-        // Apply Jetting Verticle Resistance
-        float verticalResistanceFactor = 1.0f;
-        currentVerticalMagnitude = Vector3.Project(rb.velocity, Vector3.up).magnitude + 0.00001f;
-        float currentVerticalAccMagnitude = Vector3.Project(accumulatedVelocityChanges, Vector3.up).magnitude / rb.mass * Time.fixedDeltaTime; // TODO: this may need to also include gravity
-        if (currentVerticalMagnitude != 0.0 && currentVerticalAccMagnitude != 0.0)
-        {
-            float scaledVerticleMagnitude = Mathf.Pow(currentVerticalMagnitude, verticalJetResistanceFactor);
-            float verticleResistanceInfluence = scaledVerticleMagnitude * verticalJetResistance;
-            if (0.25f < verticleResistanceInfluence)
-            {
-                verticleResistanceInfluence = 0.25f;
-            }
-            verticalResistanceFactor = ((currentVerticalMagnitude - verticleResistanceInfluence * currentVerticalAccMagnitude) / currentVerticalMagnitude);
-        }
-
-        // Apply Jetting Horizontal Resistance
-        float horizontalResistanceFactor = 1.0f;
-        currentHorizontalMagnitude = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).magnitude + 0.00001f;
-        float currentHorizontalAccMagnitude = Vector3.ProjectOnPlane(accumulatedVelocityChanges, Vector3.up).magnitude / rb.mass * Time.fixedDeltaTime;
-        if (currentHorizontalMagnitude != 0.0f && currentHorizontalAccMagnitude != 0.0f)
-        {
-            float scaledHorizontalMagnitude = Mathf.Pow(currentHorizontalMagnitude, horizontalJetResistanceFactor);
-            float horizontalResistanceInfluence = scaledHorizontalMagnitude * horizontalJetResistance;
-            if (0.925f < horizontalResistanceInfluence)
-            {
-                horizontalResistanceInfluence = 0.925f;
-            }
-            horizontalResistanceFactor = (currentHorizontalMagnitude - horizontalResistanceInfluence * currentHorizontalAccMagnitude) / currentHorizontalMagnitude;
-        }
-
-        // Apply Resistance Values
-        rb.AddForce(-rb.velocity + new Vector3(rb.velocity.x * horizontalResistanceFactor, rb.velocity.y * verticalResistanceFactor, rb.velocity.z * horizontalResistanceFactor), ForceMode.VelocityChange);
-
-
-        Vector3 debugHorVel = -Vector3.ProjectOnPlane(rb.velocity, Vector3.up) + new Vector3(rb.velocity.x * horizontalResistanceFactor, 0, rb.velocity.z * horizontalResistanceFactor);
-        Vector3 debugVertVel = -Vector3.Project(rb.velocity, Vector3.up) + new Vector3(0, rb.velocity.y * verticalResistanceFactor, 0);
-        Debug.DrawRay(playerPositionCenter + Vector3.up * 2f + transform.forward * 2f, debugHorVel, Color.yellow, 10.0f);
-        Debug.DrawRay(playerPositionCenter + Vector3.up * 2f + transform.forward * 2f, debugVertVel, Color.white, 10.0f);
-
-        // Apply Final Acceleration forces
-        if (accumulatedVelocityChanges.magnitude > 0.0f)
-            rb.AddForce(accumulatedVelocityChanges);
     }
 
     private void HandleRotation()
