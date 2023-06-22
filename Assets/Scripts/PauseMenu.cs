@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 public class PauseMenu : MonoBehaviour
 {
-    private bool devMode = false;
+    private bool devMode = true;
     [SerializeField ] private PlayerController playerController;
     [SerializeField ] private Button quitButton;
     [SerializeField ] private Button restartButton;
