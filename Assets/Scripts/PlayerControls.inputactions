@@ -15,7 +15,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Jump",
+                    "name": "Jump / Jet",
                     "type": "Button",
                     "id": "5c147ef4-a771-41bc-a0da-5d22345a88cc",
                     "expectedControlType": "Button",
@@ -24,7 +24,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MoveVector",
+                    "name": "Move",
                     "type": "Value",
                     "id": "5f954712-d352-4f46-84b8-df597f27b69b",
                     "expectedControlType": "Vector2",
@@ -33,7 +33,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "LookVector",
+                    "name": "Look",
                     "type": "Value",
                     "id": "69d04e48-5c2c-4185-9024-8ee2eb8d07b0",
                     "expectedControlType": "Vector2",
@@ -42,7 +42,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "DownJet",
+                    "name": "Down Jet",
                     "type": "Button",
                     "id": "f1ed069d-0b72-480f-beda-e9259634b5ca",
                     "expectedControlType": "Button",
@@ -51,7 +51,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "TimeSlow",
+                    "name": "Time Slow",
                     "type": "Button",
                     "id": "6faec846-c61a-4b4a-8cec-bc4c6d20197f",
                     "expectedControlType": "Button",
@@ -60,7 +60,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "ToggleSki",
+                    "name": "Toggle Ski",
                     "type": "Button",
                     "id": "8aeb1a7d-0d65-4b7b-9ded-fcd0806676c4",
                     "expectedControlType": "Button",
@@ -88,7 +88,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Jump",
+                    "action": "Jump / Jet",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -99,7 +99,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveVector",
+                    "action": "Move",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
@@ -110,7 +110,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveVector",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -121,7 +121,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveVector",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -132,7 +132,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveVector",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -143,7 +143,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveVector",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -154,7 +154,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "LookVector",
+                    "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -165,7 +165,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "DownJet",
+                    "action": "Down Jet",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -176,7 +176,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "TimeSlow",
+                    "action": "Time Slow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -187,7 +187,46 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ToggleSki",
+                    "action": "Toggle Ski",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "982abddc-7cf8-4d3d-be8d-96e5711a70ae",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "07028ae3-1ad2-4a9f-ab57-c0d17623d3a2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8c3b5a35-354e-4def-86d1-2ab5430bcaf4",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bb636863-8048-4c0c-bb53-9fdc26b9f522",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

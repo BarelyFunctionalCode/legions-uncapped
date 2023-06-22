@@ -4,34 +4,15 @@ using UnityEngine;
 
 public class CameraPitchController : MonoBehaviour
 {
-    private float rotationSpeed = 40.0f;
-    private float rotationLimit = 60.0f;
-
-    private PlayerControls playerControls;
-
-    bool hasFocus = false;
-
-    void Awake()
-    {
-        playerControls = new PlayerControls();
-    }
-
-    void OnApplicationFocus(bool tempHasFocus)
-    {
-        if (tempHasFocus) Cursor.lockState = CursorLockMode.Locked;
-        hasFocus = tempHasFocus;
-    }
-    
-    void OnEnable() { playerControls.Enable(); }
-    void OnDisable() { playerControls.Disable(); }
+    [SerializeField ] private PlayerController playerController;
 
     void FixedUpdate()
     {
-        if (!hasFocus) return;
-        Vector2 rotationInput = playerControls.Movement.LookVector.ReadValue<Vector2>();
+        if (!playerController.hasFocus) return;
+        Vector2 rotationInput = playerController.playerControls.Movement.Look.ReadValue<Vector2>();
         Vector3 rotation = new Vector3(-rotationInput.y, 0f, 0f);
-        rotation *= rotationSpeed * Time.fixedDeltaTime;
-        rotation = Vector3.ClampMagnitude(rotation, rotationLimit);
+        rotation *= playerController.verticalRotationSpeed * Time.fixedDeltaTime;
+        rotation = Vector3.ClampMagnitude(rotation, playerController.verticalRotationLimit);
         float currentXRotation = transform.eulerAngles.x < 180f ? transform.eulerAngles.x : transform.eulerAngles.x - 360f;
         rotation.x = Mathf.Clamp(currentXRotation + rotation.x, -89.0f, 89.0f) - currentXRotation;
         transform.Rotate(rotation);

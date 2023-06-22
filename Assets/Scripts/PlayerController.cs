@@ -10,14 +10,19 @@ public class PlayerController : MonoBehaviour
     // private float maxRunUpSurfaceAngle = 50f; 
     private float mass = 75f;
 
-    private float rotationSpeed = 20f;
-    private float rotationLimit = 20f;
+    [PauseMenuOption("Horizontal Look", 0f, 100f)]
+    public float horizontalRotationSpeed = 20f;
+    private float horizontalRotationLimit = 100f;
+
+    [PauseMenuOption("Vertical Look", 0f, 100f)]
+    public float verticalRotationSpeed = 60f;
+    public float verticalRotationLimit = 100f;
 
     [Header("Physics")]
     [SerializeField] private PhysicMaterial skiMaterial;
     [SerializeField] private PhysicMaterial normalMaterial;
 
-    private PlayerControls playerControls;
+    public PlayerControls playerControls;
     private Rigidbody rb;
     private CapsuleCollider playerCollider;
     private TerrainDetector terrainDetector;
@@ -30,35 +35,37 @@ public class PlayerController : MonoBehaviour
     [SerializeField ] private float hoverHeightMax = 0.2f;
 
     [Header("Skiing")]
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float skiStrength = 40f;
+    // public static float skiStrengthMin = 0f;
+    // public static float skiStrengthMax = 300f;
+    [PauseMenuDevOption("Ski Force", 0f, 300f)]
+    [SerializeField ] public float skiStrength = 40f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float resistSkiSpeed = 40f;
+    [PauseMenuDevOption("Skiing Resist Speed", 0f, 300f)]
+    [SerializeField ] public float resistSkiSpeed = 40f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float maxSkiSpeed = 120f;
+    [PauseMenuDevOption("Skiing Max Speed", 0f, 300f)]
+    [SerializeField ] public float maxSkiSpeed = 120f;
 
 
     [Header("Jetting")]
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float upJetStrength = 40f;
+    [PauseMenuDevOption("Up Jet Force", 0f, 300f)]
+    [SerializeField ] public float upJetStrength = 40f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float resistUpJetSpeed = 60f;
+    [PauseMenuDevOption("Up Jeting Resist Speed", 0f, 300f)]
+    [SerializeField ] public float resistUpJetSpeed = 60f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float maxUpJetSpeed = 120f;
+    [PauseMenuDevOption("Up Jeting Max Speed", 0f, 300f)]
+    [SerializeField ] public float maxUpJetSpeed = 120f;
 
     
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float downJetStrength = 40f;
+    [PauseMenuDevOption("Down Jet Force", 0f, 300f)]
+    [SerializeField ] public float downJetStrength = 40f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float resistDownJetSpeed = 60f;
+    [PauseMenuDevOption("Down Jeting Resist Speed", 0f, 300f)]
+    [SerializeField ] public float resistDownJetSpeed = 60f;
 
-    [Range(0.0f, 300f)]
-    [SerializeField ] private float maxDownJetSpeed = 120f;
+    [PauseMenuDevOption("Down Jeting Max Speed", 0f, 300f)]
+    [SerializeField ] public float maxDownJetSpeed = 120f;
 
     private Vector3 lastKnownSurfaceNormal = Vector3.zero;
     private Vector3 lastKnownSurfacePoint = Vector3.zero;
@@ -70,7 +77,12 @@ public class PlayerController : MonoBehaviour
     bool skiToggleInput = false;
     bool skiToggle = false;
 
-    bool hasFocus = false;
+    bool pauseToggleInput = false;
+    bool pauseToggle = false;
+
+    public bool hasFocus = false;
+
+    [SerializeField ] private Transform playerUI;
 
     void Awake()
     {
@@ -100,6 +112,14 @@ public class PlayerController : MonoBehaviour
             skiToggle = !skiToggle;
         }
         skiToggleInput = tempSkiToggleInput;
+
+        if (playerControls.UI.Pause.WasPressedThisFrame())
+        {
+            bool newMenuState = !playerUI.Find("PauseMenu").gameObject.activeSelf;
+            Cursor.lockState = newMenuState ? CursorLockMode.Confined : CursorLockMode.Locked;
+            Time.timeScale = newMenuState ? 0.0f : 1.0f;
+            playerUI.Find("PauseMenu").gameObject.SetActive(newMenuState);
+        }
     }
 
     void FixedUpdate()
@@ -111,14 +131,14 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         // Get movement input
-        Vector2 movementInput = playerControls.Movement.MoveVector.ReadValue<Vector2>();
+        Vector2 movementInput = playerControls.Movement.Move.ReadValue<Vector2>();
         Vector3 movement = new Vector3(movementInput.x, 0f, movementInput.y);
         // Get direction of movement relative to player rotation
         Vector3 movementDirection = transform.TransformDirection(movement).normalized;
     
         // Get input for skiing, jumping, and down jetting
         bool isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f || skiToggle;
-        bool isJumping = playerControls.Movement.Jump.ReadValue<float>() > 0.0f;
+        bool isJumping = playerControls.Movement.JumpJet.ReadValue<float>() > 0.0f;
         bool isUpJetting = isSkiing && isJumping;
         bool isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
         bool isJetting = isUpJetting || isDownJetting;
@@ -325,10 +345,20 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRotation()
     {
-        Vector2 rotationInput = playerControls.Movement.LookVector.ReadValue<Vector2>();
+        Vector2 rotationInput = playerControls.Movement.Look.ReadValue<Vector2>();
         Vector3 rotation = new Vector3(0f, rotationInput.x, 0f);
-        rotation *= rotationSpeed * Time.fixedDeltaTime;
-        rotation = Vector3.ClampMagnitude(rotation, rotationLimit);
+        rotation *= horizontalRotationSpeed * Time.fixedDeltaTime;
+        rotation = Vector3.ClampMagnitude(rotation, horizontalRotationLimit);
         transform.Rotate(rotation);
+    }
+
+    public float GetFieldValue(string fieldName)
+    {
+        return (float)this.GetType().GetField(fieldName).GetValue(this);
+    }
+
+    public void SetFieldValue(string fieldName, float newValue)
+    {
+        this.GetType().GetField(fieldName).SetValue(this, newValue);
     }
 }

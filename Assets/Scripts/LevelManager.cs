@@ -18,16 +18,16 @@ public class LevelManager : MonoBehaviour
     void OnEnable() { playerControls.Enable(); }
     void OnDisable() { playerControls.Disable(); }
 
-    void Update()
-    {
-        bool isSlowdown = playerControls.Movement.TimeSlow.ReadValue<float>() > 0.0f;
+    // void Update()
+    // {
+    //     bool isSlowdown = playerControls.Movement.TimeSlow.ReadValue<float>() > 0.0f;
 
-        if (isSlowdown)
-            timeScale = slowDownTimeScale;
-        else
-            timeScale = constantTimeScale;
+    //     if (isSlowdown)
+    //         timeScale = slowDownTimeScale;
+    //     else
+    //         timeScale = constantTimeScale;
 
-        if (timeScale != Time.timeScale)
-            Time.timeScale = timeScale;
-    }
+    //     if (timeScale != Time.timeScale)
+    //         Time.timeScale = timeScale;
+    // }
 }

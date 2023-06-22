@@ -37,7 +37,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Jump"",
+                    ""name"": ""Jump / Jet"",
                     ""type"": ""Button"",
                     ""id"": ""5c147ef4-a771-41bc-a0da-5d22345a88cc"",
                     ""expectedControlType"": ""Button"",
@@ -46,7 +46,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MoveVector"",
+                    ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""5f954712-d352-4f46-84b8-df597f27b69b"",
                     ""expectedControlType"": ""Vector2"",
@@ -55,7 +55,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""LookVector"",
+                    ""name"": ""Look"",
                     ""type"": ""Value"",
                     ""id"": ""69d04e48-5c2c-4185-9024-8ee2eb8d07b0"",
                     ""expectedControlType"": ""Vector2"",
@@ -64,7 +64,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""DownJet"",
+                    ""name"": ""Down Jet"",
                     ""type"": ""Button"",
                     ""id"": ""f1ed069d-0b72-480f-beda-e9259634b5ca"",
                     ""expectedControlType"": ""Button"",
@@ -73,7 +73,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""TimeSlow"",
+                    ""name"": ""Time Slow"",
                     ""type"": ""Button"",
                     ""id"": ""6faec846-c61a-4b4a-8cec-bc4c6d20197f"",
                     ""expectedControlType"": ""Button"",
@@ -82,7 +82,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""ToggleSki"",
+                    ""name"": ""Toggle Ski"",
                     ""type"": ""Button"",
                     ""id"": ""8aeb1a7d-0d65-4b7b-9ded-fcd0806676c4"",
                     ""expectedControlType"": ""Button"",
@@ -110,7 +110,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Jump"",
+                    ""action"": ""Jump / Jet"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -121,7 +121,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveVector"",
+                    ""action"": ""Move"",
                     ""isComposite"": true,
                     ""isPartOfComposite"": false
                 },
@@ -132,7 +132,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveVector"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
@@ -143,7 +143,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveVector"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
@@ -154,7 +154,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveVector"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
@@ -165,7 +165,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveVector"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
@@ -176,7 +176,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""LookVector"",
+                    ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -187,7 +187,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""DownJet"",
+                    ""action"": ""Down Jet"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -198,7 +198,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""TimeSlow"",
+                    ""action"": ""Time Slow"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -209,7 +209,46 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ToggleSki"",
+                    ""action"": ""Toggle Ski"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""UI"",
+            ""id"": ""982abddc-7cf8-4d3d-be8d-96e5711a70ae"",
+            ""actions"": [
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""07028ae3-1ad2-4a9f-ab57-c0d17623d3a2"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""8c3b5a35-354e-4def-86d1-2ab5430bcaf4"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bb636863-8048-4c0c-bb53-9fdc26b9f522"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -221,12 +260,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         // Movement
         m_Movement = asset.FindActionMap("Movement", throwIfNotFound: true);
         m_Movement_Ski = m_Movement.FindAction("Ski", throwIfNotFound: true);
-        m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
-        m_Movement_MoveVector = m_Movement.FindAction("MoveVector", throwIfNotFound: true);
-        m_Movement_LookVector = m_Movement.FindAction("LookVector", throwIfNotFound: true);
-        m_Movement_DownJet = m_Movement.FindAction("DownJet", throwIfNotFound: true);
-        m_Movement_TimeSlow = m_Movement.FindAction("TimeSlow", throwIfNotFound: true);
-        m_Movement_ToggleSki = m_Movement.FindAction("ToggleSki", throwIfNotFound: true);
+        m_Movement_JumpJet = m_Movement.FindAction("Jump / Jet", throwIfNotFound: true);
+        m_Movement_Move = m_Movement.FindAction("Move", throwIfNotFound: true);
+        m_Movement_Look = m_Movement.FindAction("Look", throwIfNotFound: true);
+        m_Movement_DownJet = m_Movement.FindAction("Down Jet", throwIfNotFound: true);
+        m_Movement_TimeSlow = m_Movement.FindAction("Time Slow", throwIfNotFound: true);
+        m_Movement_ToggleSki = m_Movement.FindAction("Toggle Ski", throwIfNotFound: true);
+        // UI
+        m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
+        m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -287,9 +329,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Movement;
     private IMovementActions m_MovementActionsCallbackInterface;
     private readonly InputAction m_Movement_Ski;
-    private readonly InputAction m_Movement_Jump;
-    private readonly InputAction m_Movement_MoveVector;
-    private readonly InputAction m_Movement_LookVector;
+    private readonly InputAction m_Movement_JumpJet;
+    private readonly InputAction m_Movement_Move;
+    private readonly InputAction m_Movement_Look;
     private readonly InputAction m_Movement_DownJet;
     private readonly InputAction m_Movement_TimeSlow;
     private readonly InputAction m_Movement_ToggleSki;
@@ -298,9 +340,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         private @PlayerControls m_Wrapper;
         public MovementActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Ski => m_Wrapper.m_Movement_Ski;
-        public InputAction @Jump => m_Wrapper.m_Movement_Jump;
-        public InputAction @MoveVector => m_Wrapper.m_Movement_MoveVector;
-        public InputAction @LookVector => m_Wrapper.m_Movement_LookVector;
+        public InputAction @JumpJet => m_Wrapper.m_Movement_JumpJet;
+        public InputAction @Move => m_Wrapper.m_Movement_Move;
+        public InputAction @Look => m_Wrapper.m_Movement_Look;
         public InputAction @DownJet => m_Wrapper.m_Movement_DownJet;
         public InputAction @TimeSlow => m_Wrapper.m_Movement_TimeSlow;
         public InputAction @ToggleSki => m_Wrapper.m_Movement_ToggleSki;
@@ -316,15 +358,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Ski.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnSki;
                 @Ski.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnSki;
                 @Ski.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnSki;
-                @Jump.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnJump;
-                @Jump.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnJump;
-                @Jump.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnJump;
-                @MoveVector.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnMoveVector;
-                @MoveVector.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnMoveVector;
-                @MoveVector.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnMoveVector;
-                @LookVector.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnLookVector;
-                @LookVector.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnLookVector;
-                @LookVector.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnLookVector;
+                @JumpJet.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnJumpJet;
+                @JumpJet.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnJumpJet;
+                @JumpJet.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnJumpJet;
+                @Move.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnMove;
+                @Look.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnLook;
+                @Look.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnLook;
+                @Look.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnLook;
                 @DownJet.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
                 @DownJet.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
                 @DownJet.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnDownJet;
@@ -341,15 +383,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Ski.started += instance.OnSki;
                 @Ski.performed += instance.OnSki;
                 @Ski.canceled += instance.OnSki;
-                @Jump.started += instance.OnJump;
-                @Jump.performed += instance.OnJump;
-                @Jump.canceled += instance.OnJump;
-                @MoveVector.started += instance.OnMoveVector;
-                @MoveVector.performed += instance.OnMoveVector;
-                @MoveVector.canceled += instance.OnMoveVector;
-                @LookVector.started += instance.OnLookVector;
-                @LookVector.performed += instance.OnLookVector;
-                @LookVector.canceled += instance.OnLookVector;
+                @JumpJet.started += instance.OnJumpJet;
+                @JumpJet.performed += instance.OnJumpJet;
+                @JumpJet.canceled += instance.OnJumpJet;
+                @Move.started += instance.OnMove;
+                @Move.performed += instance.OnMove;
+                @Move.canceled += instance.OnMove;
+                @Look.started += instance.OnLook;
+                @Look.performed += instance.OnLook;
+                @Look.canceled += instance.OnLook;
                 @DownJet.started += instance.OnDownJet;
                 @DownJet.performed += instance.OnDownJet;
                 @DownJet.canceled += instance.OnDownJet;
@@ -363,14 +405,51 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         }
     }
     public MovementActions @Movement => new MovementActions(this);
+
+    // UI
+    private readonly InputActionMap m_UI;
+    private IUIActions m_UIActionsCallbackInterface;
+    private readonly InputAction m_UI_Pause;
+    public struct UIActions
+    {
+        private @PlayerControls m_Wrapper;
+        public UIActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Pause => m_Wrapper.m_UI_Pause;
+        public InputActionMap Get() { return m_Wrapper.m_UI; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UIActions set) { return set.Get(); }
+        public void SetCallbacks(IUIActions instance)
+        {
+            if (m_Wrapper.m_UIActionsCallbackInterface != null)
+            {
+                @Pause.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPause;
+                @Pause.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPause;
+                @Pause.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPause;
+            }
+            m_Wrapper.m_UIActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Pause.started += instance.OnPause;
+                @Pause.performed += instance.OnPause;
+                @Pause.canceled += instance.OnPause;
+            }
+        }
+    }
+    public UIActions @UI => new UIActions(this);
     public interface IMovementActions
     {
         void OnSki(InputAction.CallbackContext context);
-        void OnJump(InputAction.CallbackContext context);
-        void OnMoveVector(InputAction.CallbackContext context);
-        void OnLookVector(InputAction.CallbackContext context);
+        void OnJumpJet(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
+        void OnLook(InputAction.CallbackContext context);
         void OnDownJet(InputAction.CallbackContext context);
         void OnTimeSlow(InputAction.CallbackContext context);
         void OnToggleSki(InputAction.CallbackContext context);
+    }
+    public interface IUIActions
+    {
+        void OnPause(InputAction.CallbackContext context);
     }
 }
