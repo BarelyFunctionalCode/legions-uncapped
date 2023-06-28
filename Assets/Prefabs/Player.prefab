@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 1855396352360668397}
   - component: {fileID: 1855396352360668396}
   - component: {fileID: 2104618479208652438}
+  - component: {fileID: 4757572648577539456}
   m_Layer: 3
   m_Name: outrider
   m_TagString: Untagged
@@ -220,6 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c81ef0786c961e4409e3a01370a95198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  devVectorRenderer: {fileID: 0}
   horizontalRotationSpeed: 20
   verticalRotationSpeed: 60
   verticalRotationLimit: 100
@@ -240,6 +242,19 @@ MonoBehaviour:
     m_Bits: 72
   hasFocus: 0
   playerUI: {fileID: 0}
+--- !u!114 &4757572648577539456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548913877977669176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc34f6e803f115343b1efbbc10d2615c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: f62f9bce33aaff34ebce7448e10c49d5, type: 2}
 --- !u!1 &2029414488523159077
 GameObject:
   m_ObjectHideFlags: 0
@@ -1228,6 +1243,7 @@ GameObject:
   - component: {fileID: 4816535709842983376}
   - component: {fileID: 4816535709842983377}
   - component: {fileID: 4816535709842983214}
+  - component: {fileID: 6090402827738130022}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -1320,6 +1336,19 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &6090402827738130022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4816535709842983215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 321c6b8def78c8d429f4880094657273, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugTextWidgetPrefabObj: {fileID: 2548197289487405122, guid: 0f1d5afda8cf1c546ae0ff35a3504bed, type: 3}
 --- !u!1 &4816535710006187929
 GameObject:
   m_ObjectHideFlags: 0
@@ -3091,6 +3120,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8160483036639030728, guid: 7ed8eeb13c2da5d42b346e8d5ce42f56, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8921786948204616756, guid: 7ed8eeb13c2da5d42b346e8d5ce42f56, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8921786948204616756, guid: 7ed8eeb13c2da5d42b346e8d5ce42f56, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8921786948204616756, guid: 7ed8eeb13c2da5d42b346e8d5ce42f56, type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

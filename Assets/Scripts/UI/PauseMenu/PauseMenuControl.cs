@@ -7,8 +7,6 @@ using UnityEngine.InputSystem;
 
 public class PauseMenuControl : MonoBehaviour
 {
-    private PlayerController playerController;
-
     private InputAction action;
 
     [SerializeField ] private new string name;
@@ -21,7 +19,7 @@ public class PauseMenuControl : MonoBehaviour
     private bool initialized = false;
 
 
-    public void Initialize(PlayerController playerController, InputAction action)
+    public void Initialize(InputAction action)
     {
         if (initialized)
         {
@@ -31,7 +29,6 @@ public class PauseMenuControl : MonoBehaviour
 
         messageObj.SetActive(false);
         
-        this.playerController = playerController;
         this.action = action;
         this.nameText.text = action.name;
         this.valueText.text = action.GetBindingDisplayString();

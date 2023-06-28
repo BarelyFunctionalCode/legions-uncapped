@@ -1,9 +1,115 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerTelemetry
+{
+    [PauseMenuDevOption("Raw Collision Data")]
+    public bool enableRawCollisionDebug = false;
+
+    [PauseMenuDevOption("Surface Data")]
+    public bool enableSurfaceDebug = false;
+
+    [PauseMenuDevOption("Movement Data")]
+    public bool enableMovementDebug = false;
+
+
+    private DevVectorRenderer devVectorRenderer;
+
+    public Vector3 position;
+    public Vector3 velocity;
+
+    public Vector3 movementDirection;
+
+    public List<Vector3> rawCollisionPoints;
+    public List<Vector3> rawCollisionDirections;
+    public List<Vector3> surfaceQueryPoints;
+    public List<Vector3> surfaceQueryDirections;
+    public Vector3 surfaceNormal;
+    public Vector3 surfacePoint;
+
+
+    public bool isSkiing;
+    public bool isUpJetting;
+    public bool isDownJetting;
+    public bool isGrounded;
+
+    public PlayerTelemetry(DevVectorRenderer devVectorRenderer)
+    {
+        this.devVectorRenderer = devVectorRenderer;
+        this.position = Vector3.zero;
+        this.velocity = Vector3.zero;
+        this.movementDirection = Vector3.zero;
+        this.rawCollisionPoints = new List<Vector3>();
+        this.rawCollisionDirections = new List<Vector3>();
+        this.surfaceQueryPoints = new List<Vector3>();
+        this.surfaceQueryDirections = new List<Vector3>();
+        this.surfaceNormal = Vector3.zero;
+        this.surfacePoint = Vector3.zero;
+        this.isSkiing = false;
+        this.isUpJetting = false;
+        this.isDownJetting = false;
+        this.isGrounded = false;
+    }
+
+    public void Update()
+    {
+
+        if (enableRawCollisionDebug)
+        {
+            for (int i = 0; i < rawCollisionPoints.Count; i++)
+            {
+                devVectorRenderer.AddDevVector(rawCollisionPoints[i], rawCollisionDirections[i], Color.Lerp(Color.red, Color.green, ((float)i / (float)rawCollisionPoints.Count)), 5.0f);
+            }
+
+            for (int i = 0; i < surfaceQueryPoints.Count; i++)
+            {
+                devVectorRenderer.AddDevVector(surfaceQueryPoints[i], surfaceQueryDirections[i], Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceQueryPoints.Count)), 1.0f);
+            }
+        }
+
+        if (enableSurfaceDebug)
+        {
+            devVectorRenderer.AddDevVector(surfacePoint, surfaceNormal * 0.5f, new Color(0f, 1f, 0f, 0.2f), 5.0f, 0.1f);
+
+            DebugWidgetManager.Instance.SetDebugText("Terrain Surface",
+            $"Point: {surfacePoint.ToString("F2")}\nNormal: {surfaceNormal.ToString("F2")}",
+            100, -200);
+        }
+        else
+        {
+            DebugWidgetManager.Instance.RemoveDebugText("Terrain Surface");
+        }
+
+        if (enableMovementDebug)
+        {
+            devVectorRenderer.AddDevVector(position, velocity.normalized, Color.blue, 5.0f);
+
+            DebugWidgetManager.Instance.SetDebugText("Velocity",
+            $"Speed: {velocity.magnitude.ToString("F2")}\nDirection: {velocity.normalized.ToString("F0")}\nDesired Direction: {movementDirection.ToString("F0")}\nIs Grounded: {isGrounded}\nIs Skiing: {isSkiing}\nIs Up Jetting: {isUpJetting}\nIs Down Jetting: {isDownJetting}",
+            100, -300);
+        }
+        else
+        {
+            DebugWidgetManager.Instance.RemoveDebugText("Velocity");
+        }
+
+        // Clear all the lists
+        rawCollisionPoints.Clear();
+        rawCollisionDirections.Clear();
+        surfaceQueryPoints.Clear();
+        surfaceQueryDirections.Clear();
+    }
+}
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private DevVectorRenderer devVectorRenderer;
+
+    public PlayerTelemetry playerTelemetry;
+
     private float drag = 0.004f;                        
     private float airCushionDrag = 0.00275f;             
     private float airCushionHeight = 10f;    
@@ -86,6 +192,8 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        playerTelemetry = new PlayerTelemetry(devVectorRenderer);
+
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody>();
         rb.sleepThreshold = 0.0f;
@@ -94,6 +202,11 @@ public class PlayerController : MonoBehaviour
         playerCollider.material = normalMaterial;
         terrainDetector = transform.parent.GetComponentInChildren<TerrainDetector>();
         animator = GetComponent<Animator>();
+    }
+
+    void Start()
+    {
+        InitializePauseMenuElements();
     }
 
     void OnApplicationFocus(bool tempHasFocus)
@@ -118,14 +231,20 @@ public class PlayerController : MonoBehaviour
             bool newMenuState = !playerUI.Find("PauseMenu").gameObject.activeSelf;
             Cursor.lockState = newMenuState ? CursorLockMode.Confined : CursorLockMode.Locked;
             Time.timeScale = newMenuState ? 0.0f : 1.0f;
+            if (newMenuState) playerControls.Movement.Disable();
+            else playerControls.Movement.Enable();
             playerUI.Find("PauseMenu").gameObject.SetActive(newMenuState);
         }
+
+        playerTelemetry.Update();
     }
 
     void FixedUpdate()
     {
         HandleMovement();
         if (hasFocus) HandleRotation();
+        playerTelemetry.position = transform.position;
+        playerTelemetry.velocity = rb.velocity;
     }
 
     private void HandleMovement()
@@ -144,6 +263,11 @@ public class PlayerController : MonoBehaviour
         bool isJetting = isUpJetting || isDownJetting;
         bool isMoving = movement.magnitude > 0.0f;
         bool isGrounded = false;
+
+        playerTelemetry.movementDirection = movementDirection;
+        playerTelemetry.isSkiing = isSkiing;
+        playerTelemetry.isUpJetting = isUpJetting;
+        playerTelemetry.isDownJetting = isDownJetting;
 
         // Set friction based on whether player is skiing or not
         playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
@@ -169,7 +293,8 @@ public class PlayerController : MonoBehaviour
             int i = 0;
             foreach (ContactPoint contact in terrainContactPoints)
             {
-                // Debug.DrawRay(contact.point - contact.normal * contact.separation, contact.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i/(float)terrainContactPoints.Count)), 5.0f);
+                playerTelemetry.rawCollisionPoints.Add(contact.point - contact.normal * contact.separation);
+                playerTelemetry.rawCollisionDirections.Add(contact.normal);
                 surfaceNormal += contact.normal;
                 surfacePoint += (contact.point - contact.normal * contact.separation);
                 i++;
@@ -198,8 +323,9 @@ public class PlayerController : MonoBehaviour
                 );
                 if (didHit)
                 {
-                    Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
-                    Debug.DrawRay(playerCollider.ClosestPoint(hit.point), Vector3.up, Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceDetectionResolution)), 1.0f);
+                    playerTelemetry.surfaceQueryPoints.Add(hit.point);
+                    playerTelemetry.surfaceQueryDirections.Add(hit.normal);
+
                     float hitDistance = Vector3.Distance(hit.point, playerCollider.ClosestPoint(hit.point));
                     if (hitDistance < distanceToSurface)
                     {
@@ -231,7 +357,8 @@ public class PlayerController : MonoBehaviour
 
                 distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, playerCollider.ClosestPoint(surfacePoint)), 0.0f);
 
-                Debug.DrawRay(hit.point, hit.normal * 2.0f, Color.cyan, 5.0f);
+                playerTelemetry.rawCollisionPoints.Add(hit.point);
+                playerTelemetry.rawCollisionDirections.Add(hit.normal);
             }
         }
 
@@ -247,7 +374,9 @@ public class PlayerController : MonoBehaviour
         }
         if (Vector3.Distance(lastKnownSurfacePoint, surfacePoint) > 0.00001f) lastKnownSurfacePoint = surfacePoint;
 
-        Debug.DrawRay(surfacePoint, surfaceNormal, Color.blue, 5.0f);
+        playerTelemetry.isGrounded = isGrounded;
+        playerTelemetry.surfacePoint = surfacePoint;
+        playerTelemetry.surfaceNormal = surfaceNormal;
 
         bool isRunning = isGrounded && isMoving && !isSkiing;
 
@@ -289,7 +418,6 @@ public class PlayerController : MonoBehaviour
             float baseForce = Physics.gravity.magnitude * hoverFactor;
 
             Vector3 lateralMovementDirection = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
-            print(lateralMovementDirection);
             Vector3 lateralSurfaceDirection = Vector3.ProjectOnPlane(surfaceNormal, Vector3.up).normalized;
             float slopeDirection = Vector3.Dot(lateralMovementDirection, lateralSurfaceDirection);
 
@@ -352,13 +480,52 @@ public class PlayerController : MonoBehaviour
         transform.Rotate(rotation);
     }
 
-    public float GetFieldValue(string fieldName)
+    private void InitializePauseMenuElements()
     {
-        return (float)this.GetType().GetField(fieldName).GetValue(this);
-    }
+        // Initialize player options in pause menu
+        FieldInfo[] fields = this.GetType().GetFields();
+        foreach (var field in fields)
+        {
+            PauseMenuOptionAttribute[] attribute = (PauseMenuOptionAttribute[])field.GetCustomAttributes(typeof(PauseMenuOptionAttribute), true);
 
-    public void SetFieldValue(string fieldName, float newValue)
-    {
-        this.GetType().GetField(fieldName).SetValue(this, newValue);
+            if (attribute.Length > 0)
+            {
+                if (!PauseMenu.Instance.devMode && attribute[0].GetType() == typeof(PauseMenuDevOptionAttribute)) continue;
+                PauseMenu.Instance.AddOption(
+                    attribute[0].GetType() == typeof(PauseMenuDevOptionAttribute) ? "dev - " + attribute[0].label : attribute[0].label,
+                    (float)field.GetValue(this),
+                    attribute[0].minValue,
+                    attribute[0].maxValue,
+                    (float value) => { field.SetValue(this, value); }
+                );
+            }
+        }
+
+        // Initialize player controls in pause menu
+        List<string> controlIgnoreList = new List<string> { "Move", "Look" };
+        InputActionMap movementMap = playerControls.Movement;
+        foreach (var action in movementMap)
+        {
+            if (controlIgnoreList.Contains(action.name)) continue;
+            PauseMenu.Instance.AddControl(action);
+        }
+
+        // Initialize player debug settings in pause menu
+        if (!PauseMenu.Instance.devMode) return;
+        fields = playerTelemetry.GetType().GetFields();
+        foreach (var field in fields)
+        {
+            PauseMenuDevOptionAttribute[] attribute = (PauseMenuDevOptionAttribute[])field.GetCustomAttributes(typeof(PauseMenuDevOptionAttribute), true);
+
+            if (attribute.Length > 0)
+            {
+                PauseMenu.Instance.AddDebug(
+                    field.Name,
+                    attribute[0].label,
+                    (bool)field.GetValue(playerTelemetry),
+                    (bool value) => { field.SetValue(playerTelemetry, value); }
+                );
+            }
+        }
     }
 }

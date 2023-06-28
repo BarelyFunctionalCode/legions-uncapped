@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class PauseMenuOption : MonoBehaviour
 {
-    private PlayerController playerController;
-
-    [SerializeField ] private new string name;
     [SerializeField ] private TMP_Text nameText;
     [SerializeField ] private TMP_Text currentValueText;
     [SerializeField ] private Slider slider;
 
+    private Action<float> updater;
+
     private bool initialized = false;
 
 
-    public void Initialize(PlayerController playerController, string name, string label, float minValue, float maxValue)
+    public void Initialize(string label, float value, float minValue, float maxValue, Action<float> updater)
     {
         if (initialized)
         {
@@ -24,12 +24,12 @@ public class PauseMenuOption : MonoBehaviour
             return;
         }
         
-        this.playerController = playerController;
         this.nameText.text = label;
-        this.name = name;
+        this.updater = updater;
+
         slider.minValue = minValue;
         slider.maxValue = maxValue;
-        slider.value = playerController.GetFieldValue(name);
+        slider.value = value;
         currentValueText.text = slider.value.ToString();
 
         slider.onValueChanged.AddListener(delegate { UpdateValue(); });
@@ -39,7 +39,7 @@ public class PauseMenuOption : MonoBehaviour
 
     public void UpdateValue()
     {
-        playerController.SetFieldValue(name, slider.value);
+        this.updater(slider.value);
         currentValueText.text = Mathf.Round(slider.value).ToString();
     }
 }
