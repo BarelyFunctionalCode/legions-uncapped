@@ -11,25 +11,25 @@ public class PauseMenu : MonoBehaviour
     public static PauseMenu Instance { get; private set; }
 
     public bool devMode { get; private set; } = true;
-    [SerializeField ] private Button quitButton;
-    [SerializeField ] private Button restartButton;
+    [SerializeField] private Button quitButton;
+    [SerializeField] private Button restartButton;
 
-    [SerializeField ] private Button optionsTabButton;
-    [SerializeField ] private Transform optionsListObj;
-    [SerializeField ] private GameObject optionsContainerObj;
-    [SerializeField ] private GameObject optionPrefabObj;
+    [SerializeField] private Button optionsTabButton;
+    [SerializeField] private Transform optionsListObj;
+    [SerializeField] private GameObject optionsContainerObj;
+    [SerializeField] private GameObject optionPrefabObj;
     private List<PauseMenuOption> optionsList = new List<PauseMenuOption>();
 
-    [SerializeField ] private Button controlsTabButton;
-    [SerializeField ] private Transform controlsListObj;
-    [SerializeField ] private GameObject controlsContainerObj;
-    [SerializeField ] private GameObject controlPrefabObj;
+    [SerializeField] private Button controlsTabButton;
+    [SerializeField] private Transform controlsListObj;
+    [SerializeField] private GameObject controlsContainerObj;
+    [SerializeField] private GameObject controlPrefabObj;
     private List<PauseMenuControl> controlsList = new List<PauseMenuControl>();
 
-    [SerializeField ] private Button debugTabButton;
-    [SerializeField ] private Transform debugListObj;
-    [SerializeField ] private GameObject debugContainerObj;
-    [SerializeField ] private GameObject debugPrefabObj;
+    [SerializeField] private Button debugTabButton;
+    [SerializeField] private Transform debugListObj;
+    [SerializeField] private GameObject debugContainerObj;
+    [SerializeField] private GameObject debugPrefabObj;
     private List<PauseMenuDebug> debugList = new List<PauseMenuDebug>();
 
 

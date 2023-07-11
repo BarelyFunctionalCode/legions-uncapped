@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraPitchController : MonoBehaviour
 {
-    [SerializeField ] private PlayerController playerController;
+    [SerializeField] private PlayerController playerController;
 
     void FixedUpdate()
     {

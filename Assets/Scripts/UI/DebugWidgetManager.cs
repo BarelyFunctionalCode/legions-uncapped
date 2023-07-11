@@ -7,7 +7,7 @@ public class DebugWidgetManager : MonoBehaviour
 {
     public static DebugWidgetManager Instance { get; private set; }
 
-    [SerializeField ] private GameObject debugTextWidgetPrefabObj;
+    [SerializeField] private GameObject debugTextWidgetPrefabObj;
 
     private Dictionary<string, TMP_Text> debugTextWidgets = new Dictionary<string, TMP_Text>();
 

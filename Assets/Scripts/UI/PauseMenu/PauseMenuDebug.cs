@@ -7,9 +7,9 @@ using System;
 
 public class PauseMenuDebug : MonoBehaviour
 {
-    [SerializeField ] private new string name;
-    [SerializeField ] private TMP_Text nameText;
-    [SerializeField ] private Toggle toggle;
+    [SerializeField] private new string name;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private Toggle toggle;
 
     private Action<bool> updater;
 

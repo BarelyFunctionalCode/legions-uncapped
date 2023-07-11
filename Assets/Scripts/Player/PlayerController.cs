@@ -104,6 +104,7 @@ public class PlayerTelemetry
     }
 }
 
+
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private DevVectorRenderer devVectorRenderer;
@@ -138,46 +139,46 @@ public class PlayerController : MonoBehaviour
 
     [Header("Hovering")]
     [Range(0.0f, 2.0f)]
-    [SerializeField ] private float hoverHeightMax = 0.2f;
+    [SerializeField] private float hoverHeightMax = 0.2f;
 
     [Header("Skiing")]
     // public static float skiStrengthMin = 0f;
     // public static float skiStrengthMax = 300f;
     [PauseMenuDevOption("Ski Force", 0f, 300f)]
-    [SerializeField ] public float skiStrength = 40f;
+    [SerializeField] public float skiStrength = 40f;
 
     [PauseMenuDevOption("Skiing Resist Speed", 0f, 300f)]
-    [SerializeField ] public float resistSkiSpeed = 40f;
+    [SerializeField] public float resistSkiSpeed = 40f;
 
     [PauseMenuDevOption("Skiing Max Speed", 0f, 300f)]
-    [SerializeField ] public float maxSkiSpeed = 120f;
+    [SerializeField] public float maxSkiSpeed = 120f;
 
 
     [Header("Jetting")]
     [PauseMenuDevOption("Up Jet Force", 0f, 300f)]
-    [SerializeField ] public float upJetStrength = 40f;
+    [SerializeField] public float upJetStrength = 40f;
 
     [PauseMenuDevOption("Up Jeting Resist Speed", 0f, 300f)]
-    [SerializeField ] public float resistUpJetSpeed = 60f;
+    [SerializeField] public float resistUpJetSpeed = 60f;
 
     [PauseMenuDevOption("Up Jeting Max Speed", 0f, 300f)]
-    [SerializeField ] public float maxUpJetSpeed = 120f;
+    [SerializeField] public float maxUpJetSpeed = 120f;
 
     
     [PauseMenuDevOption("Down Jet Force", 0f, 300f)]
-    [SerializeField ] public float downJetStrength = 40f;
+    [SerializeField] public float downJetStrength = 40f;
 
     [PauseMenuDevOption("Down Jeting Resist Speed", 0f, 300f)]
-    [SerializeField ] public float resistDownJetSpeed = 60f;
+    [SerializeField] public float resistDownJetSpeed = 60f;
 
     [PauseMenuDevOption("Down Jeting Max Speed", 0f, 300f)]
-    [SerializeField ] public float maxDownJetSpeed = 120f;
+    [SerializeField] public float maxDownJetSpeed = 120f;
 
     private Vector3 lastKnownSurfaceNormal = Vector3.zero;
     private Vector3 lastKnownSurfacePoint = Vector3.zero;
 
     [Header("Collision Detection")]
-    [SerializeField ] private LayerMask ignoreLayers;
+    [SerializeField] private LayerMask ignoreLayers;
 
 
     bool skiToggleInput = false;
@@ -188,7 +189,12 @@ public class PlayerController : MonoBehaviour
 
     public bool hasFocus = false;
 
-    [SerializeField ] private Transform playerUI;
+    [SerializeField] private Transform playerUI;
+
+    [SerializeField] private Transform weaponMountPoint;
+    [SerializeField] private Transform throwableMountPoint;
+
+    private PlayerLoadout playerLoadout;
 
     void Awake()
     {
@@ -202,6 +208,8 @@ public class PlayerController : MonoBehaviour
         playerCollider.material = normalMaterial;
         terrainDetector = transform.parent.GetComponentInChildren<TerrainDetector>();
         animator = GetComponent<Animator>();
+        playerLoadout = GetComponent<PlayerLoadout>();
+        playerLoadout.Initialize(this, weaponMountPoint, throwableMountPoint);
     }
 
     void Start()
@@ -214,8 +222,18 @@ public class PlayerController : MonoBehaviour
         if (tempHasFocus) Cursor.lockState = CursorLockMode.Locked;
         hasFocus = tempHasFocus;
     }
-    void OnEnable() { playerControls.Enable(); }
-    void OnDisable() { playerControls.Disable(); }
+    void OnEnable()
+    {
+        playerControls.Enable();
+        playerControls.Equipment.NextWeapon.started += ctx => playerLoadout.NextWeapon();
+        playerControls.Equipment.PreviousWeapon.started += ctx => playerLoadout.PreviousWeapon();
+    }
+    void OnDisable()
+    {
+        playerControls.Disable();
+        playerControls.Equipment.NextWeapon.started -= ctx => playerLoadout.NextWeapon();
+        playerControls.Equipment.PreviousWeapon.started -= ctx => playerLoadout.PreviousWeapon();
+    }
 
     void Update()
     {
@@ -231,8 +249,11 @@ public class PlayerController : MonoBehaviour
             bool newMenuState = !playerUI.Find("PauseMenu").gameObject.activeSelf;
             Cursor.lockState = newMenuState ? CursorLockMode.Confined : CursorLockMode.Locked;
             Time.timeScale = newMenuState ? 0.0f : 1.0f;
-            if (newMenuState) playerControls.Movement.Disable();
-            else playerControls.Movement.Enable();
+            if (newMenuState) {
+                playerControls.Disable();
+                playerControls.UI.Enable();
+            }
+            else playerControls.Enable();
             playerUI.Find("PauseMenu").gameObject.SetActive(newMenuState);
         }
 
@@ -502,12 +523,15 @@ public class PlayerController : MonoBehaviour
         }
 
         // Initialize player controls in pause menu
-        List<string> controlIgnoreList = new List<string> { "Move", "Look" };
-        InputActionMap movementMap = playerControls.Movement;
-        foreach (var action in movementMap)
+        List<string> controlIgnoreList = new List<string> { "Pause","Move", "Look" };
+        // InputActionMap movementMap = playerControls.Movement;
+        foreach (var actionMap in playerControls.asset.actionMaps)
         {
-            if (controlIgnoreList.Contains(action.name)) continue;
-            PauseMenu.Instance.AddControl(action);
+            foreach (var action in actionMap)
+            {
+                if (controlIgnoreList.Contains(action.name)) continue;
+                PauseMenu.Instance.AddControl(action);
+            }
         }
 
         // Initialize player debug settings in pause menu

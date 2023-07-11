@@ -7,9 +7,9 @@ using System;
 
 public class PauseMenuOption : MonoBehaviour
 {
-    [SerializeField ] private TMP_Text nameText;
-    [SerializeField ] private TMP_Text currentValueText;
-    [SerializeField ] private Slider slider;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private TMP_Text currentValueText;
+    [SerializeField] private Slider slider;
 
     private Action<float> updater;
 

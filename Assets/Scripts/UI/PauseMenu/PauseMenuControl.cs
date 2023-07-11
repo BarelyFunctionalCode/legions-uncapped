@@ -9,12 +9,12 @@ public class PauseMenuControl : MonoBehaviour
 {
     private InputAction action;
 
-    [SerializeField ] private new string name;
-    [SerializeField ] private TMP_Text nameText;
-    [SerializeField ] private TMP_Text valueText;
+    [SerializeField] private new string name;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private TMP_Text valueText;
 
-    [SerializeField ] private GameObject messageObj;
-    [SerializeField ] private Button remapButton;
+    [SerializeField] private GameObject messageObj;
+    [SerializeField] private Button remapButton;
 
     private bool initialized = false;
 
