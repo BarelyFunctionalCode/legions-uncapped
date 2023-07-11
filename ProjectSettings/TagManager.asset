@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Terrain
+  - Weapon
+  - Projectile
+  - Throwable
   layers:
   - Default
   - TransparentFX
@@ -13,8 +17,8 @@ TagManager:
   - UI
   - Terrain Detector
   - Terrain
-  - 
-  - 
+  - Projectile
+  - Throwable
   - 
   - 
   - 
