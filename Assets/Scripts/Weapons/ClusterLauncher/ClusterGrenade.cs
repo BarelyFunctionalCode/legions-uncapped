@@ -67,7 +67,7 @@ public class ClusterGrenade : Projectile
         RaycastHit hit;
         bool didHit = Physics.Raycast(
             new Ray(
-                transform.position,
+                GetComponent<Rigidbody>().position,
                 Vector3.down
             ),
             out hit
@@ -79,7 +79,7 @@ public class ClusterGrenade : Projectile
         {
             // Create ring of grenades
             float angle = 360.0f + Random.Range(-30f, 30f) / clusterCount * i;
-            Vector3 spawnPos = transform.position + Quaternion.Euler(0, angle, 0) * transform.forward * 0.1f;
+            Vector3 spawnPos = GetComponent<Rigidbody>().position + Quaternion.Euler(0, angle, 0) * transform.forward * 0.1f;
             if (isGrounded) spawnPos += Vector3.up * 0.5f;
 
             GameObject newGrenadeObj = Instantiate(grenadePrefabObj, spawnPos, transform.rotation, transform);
@@ -90,7 +90,7 @@ public class ClusterGrenade : Projectile
                 maxDamage / (clusterCount-1)
             );
 
-            newGrenadeObj.GetComponent<Rigidbody>().AddExplosionForce(80, transform.position + Random.insideUnitSphere * 0.1f, 10, 0, ForceMode.Impulse);
+            newGrenadeObj.GetComponent<Rigidbody>().AddExplosionForce(80, GetComponent<Rigidbody>().position + Random.insideUnitSphere * 0.1f, 10, 0, ForceMode.Impulse);
         }
 
         Destroy(gameObject);
