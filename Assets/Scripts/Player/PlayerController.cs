@@ -174,6 +174,30 @@ public class PlayerController : MonoBehaviour
     [PauseMenuDevOption("Down Jeting Max Speed", 0f, 300f)]
     [SerializeField] public float maxDownJetSpeed = 120f;
 
+    [Header("Running")]
+    [PauseMenuDevOption("Run Force", 0f, 50f)]
+    [SerializeField] public float runStrength = 40f;
+
+    [PauseMenuDevOption("Running Resist Speed", 0f, 50f)]
+    [SerializeField] public float resistRunSpeed = 18f;
+
+    [PauseMenuDevOption("Running Max Speed", 0f, 50f)]
+    [SerializeField] public float maxRunSpeed = 20f;
+
+    [Header("Jumping")]
+    [PauseMenuDevOption("Jump Force", 0f, 3000f)]
+    [SerializeField] public float jumpStrength = 2200f;
+
+    [Header("Air Control")]
+    [PauseMenuDevOption("Air Control Force", 0f, 10f)]
+    [SerializeField] public float airControlStrength = 2f;
+
+    [PauseMenuDevOption("Air Control Resist Speed", 0f, 50f)]
+    [SerializeField] public float resistAirControlSpeed = 18f;
+
+    [PauseMenuDevOption("Air Control Max Speed", 0f, 50f)]
+    [SerializeField] public float maxAirControlSpeed = 20f;
+
     private Vector3 lastKnownSurfaceNormal = Vector3.zero;
     private Vector3 lastKnownSurfacePoint = Vector3.zero;
 
@@ -183,9 +207,7 @@ public class PlayerController : MonoBehaviour
 
     bool skiToggleInput = false;
     bool skiToggle = false;
-
-    bool pauseToggleInput = false;
-    bool pauseToggle = false;
+    bool isJumping = false;
 
     public bool hasFocus = false;
 
@@ -225,14 +247,21 @@ public class PlayerController : MonoBehaviour
     void OnEnable()
     {
         playerControls.Enable();
-        playerControls.Equipment.NextWeapon.started += ctx => playerLoadout.NextWeapon();
-        playerControls.Equipment.PreviousWeapon.started += ctx => playerLoadout.PreviousWeapon();
+        playerControls.Equipment.NextWeapon.started += playerLoadout.NextWeapon;
+        playerControls.Equipment.PreviousWeapon.started += playerLoadout.PreviousWeapon;
+        playerControls.Movement.JumpJet.started += OnJumpStarted;
     }
     void OnDisable()
     {
         playerControls.Disable();
-        playerControls.Equipment.NextWeapon.started -= ctx => playerLoadout.NextWeapon();
-        playerControls.Equipment.PreviousWeapon.started -= ctx => playerLoadout.PreviousWeapon();
+        playerControls.Equipment.NextWeapon.started -= playerLoadout.NextWeapon;
+        playerControls.Equipment.PreviousWeapon.started -= playerLoadout.PreviousWeapon;
+        playerControls.Movement.JumpJet.started -= OnJumpStarted;
+    }
+
+    private void OnJumpStarted(InputAction.CallbackContext _)
+    {
+        isJumping = true;
     }
 
     void Update()
@@ -278,8 +307,7 @@ public class PlayerController : MonoBehaviour
     
         // Get input for skiing, jumping, and down jetting
         bool isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f || skiToggle;
-        bool isJumping = playerControls.Movement.JumpJet.ReadValue<float>() > 0.0f;
-        bool isUpJetting = isSkiing && isJumping;
+        bool isUpJetting = isSkiing && playerControls.Movement.JumpJet.ReadValue<float>() > 0.0f;
         bool isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
         bool isJetting = isUpJetting || isDownJetting;
         bool isMoving = movement.magnitude > 0.0f;
@@ -433,7 +461,6 @@ public class PlayerController : MonoBehaviour
         // Skiing Movement
         if (isSkiing)
         {
-
             // Hovering
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
             float baseForce = Physics.gravity.magnitude * hoverFactor;
@@ -489,6 +516,32 @@ public class PlayerController : MonoBehaviour
             if (isDownJetting) jetForce += -Vector3.up * downJetStrength * verticalJetResistMultiplier;
 
             rb.AddForce(jetForce, ForceMode.Acceleration);
+        }
+
+        // Running Movement
+        if (isRunning)
+        {
+            float currentSpeed = Vector3.Dot(rb.velocity, movementDirection);
+            float resistMultiplier = Mathf.Max(1.0f - ((currentSpeed - resistRunSpeed) / (maxRunSpeed - resistRunSpeed)), 0.0f);
+            Vector3 force = movementDirection * runStrength * resistMultiplier;
+            rb.AddForce(force, ForceMode.Acceleration);
+        }
+
+        // Jumping
+        if (isJumping && isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
+            animator.SetTrigger("triggerJump");
+            isJumping = false;
+        }
+
+        // Air Control
+        if (!isGrounded && !isSkiing)
+        {
+            float currentSpeed = Vector3.Dot(rb.velocity, movementDirection);
+            float resistMultiplier = Mathf.Max(1.0f - ((currentSpeed - resistAirControlSpeed) / (maxAirControlSpeed - resistAirControlSpeed)), 0.0f);
+            Vector3 force = movementDirection * airControlStrength * resistMultiplier;
+            rb.AddForce(force, ForceMode.Acceleration);
         }
     }
 

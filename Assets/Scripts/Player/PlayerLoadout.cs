@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerLoadout : MonoBehaviour
 {
@@ -50,14 +51,14 @@ public class PlayerLoadout : MonoBehaviour
     }
 
 
-    public void NextWeapon()
+    public void NextWeapon(InputAction.CallbackContext _)
     {
         currentWeaponsObjList[currentWeaponIndex].GetComponent<Weapon>().Unequip();
         currentWeaponIndex = (currentWeaponIndex + 1) % currentWeaponsObjList.Count;
         currentWeaponsObjList[currentWeaponIndex].GetComponent<Weapon>().Equip();
     }
 
-    public void PreviousWeapon()
+    public void PreviousWeapon(InputAction.CallbackContext _)
     {
         currentWeaponsObjList[currentWeaponIndex].GetComponent<Weapon>().Unequip();
         currentWeaponIndex = (currentWeaponIndex - 1 + currentWeaponsObjList.Count) % currentWeaponsObjList.Count;

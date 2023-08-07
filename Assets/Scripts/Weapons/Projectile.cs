@@ -26,7 +26,7 @@ public class Projectile : MonoBehaviour
 
     protected virtual void Awake()
     {
-        previousPosition = transform.position;
+        previousPosition = GetComponent<Rigidbody>().position;
         if (damageRadiusTrigger != null) damageRadiusTrigger.radius = damageRadius * 2;
     }
 
@@ -41,14 +41,14 @@ public class Projectile : MonoBehaviour
             Impact();
         }
 
-        transform.LookAt(transform.position + GetComponent<Rigidbody>().velocity.normalized);
+        transform.LookAt(GetComponent<Rigidbody>().position + GetComponent<Rigidbody>().velocity.normalized);
 
-        float currentDisplacement = (transform.position - previousPosition).magnitude;
+        float currentDisplacement = (GetComponent<Rigidbody>().position - previousPosition).magnitude;
 
         if (damageRadiusTrigger != null) damageRadiusTrigger.height = currentDisplacement * 2 + damageRadius * 2;
         if (damageRadiusTrigger != null) damageRadiusTrigger.center = new Vector3(0, damageRadiusTrigger.height / 2, 0);
 
-        previousPosition = transform.position;
+        previousPosition = GetComponent<Rigidbody>().position;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -142,7 +142,7 @@ public class Projectile : MonoBehaviour
             ApplyDamage(receiver.gameObject, maxDamage * Mathf.Max(1 - distance / damageRadius, 0));
             if (receiver.GetComponent<Rigidbody>() != null) receiver.GetComponent<Rigidbody>().AddExplosionForce(
                 maxImpactForce,
-                transform.position,
+                GetComponent<Rigidbody>().position,
                 damageRadius,
                 1,
                 ForceMode.Impulse
