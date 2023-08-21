@@ -1164,6 +1164,18 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2104618479208652438, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: hoverHeightMax
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129847466862892098, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
+    - target: {fileID: 4750743439751955439, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
+      propertyPath: m_Interpolate
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4816535711594619940, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_RootOrder
       value: 11

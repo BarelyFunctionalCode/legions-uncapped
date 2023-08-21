@@ -207,7 +207,21 @@ public class PlayerController : MonoBehaviour
 
     bool skiToggleInput = false;
     bool skiToggle = false;
+
+    Vector3 movementDirection = Vector3.zero;
+    Vector3 movementDirectionAdjusted = Vector3.zero;
     bool isJumping = false;
+    bool isSkiing = false;
+    bool isUpJetting = false;
+    bool isDownJetting = false;
+    bool isJetting = false;
+    bool isMoving = false;
+    bool isRunning = false;
+    bool isGrounded = false;
+
+    Vector3 surfaceNormal = Vector3.up;
+    Vector3 surfacePoint = Vector3.zero;
+    float distanceToSurface = Mathf.Infinity;
 
     public bool hasFocus = false;
 
@@ -266,6 +280,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        HandleInputs();
+
         bool tempSkiToggleInput = playerControls.Movement.ToggleSki.ReadValue<float>() > 0.0f;
         if (tempSkiToggleInput && !skiToggleInput)
         {
@@ -287,49 +303,80 @@ public class PlayerController : MonoBehaviour
         }
 
         playerTelemetry.Update();
+
+        // Set friction based on whether player is skiing or not
+        playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
+
+        // Apply Drag
+        float chosenDrag = 0.0f;
+        if (distanceToSurface <= airCushionHeight)
+        {
+            chosenDrag = airCushionDrag;
+        }
+        else
+        {
+            chosenDrag = drag;
+        }
+        rb.drag = chosenDrag;
     }
 
     void FixedUpdate()
     {
+        HandleCollision();
         HandleMovement();
+
         if (hasFocus) HandleRotation();
         playerTelemetry.position = transform.position;
         playerTelemetry.velocity = rb.velocity;
     }
 
-    private void HandleMovement()
+    private void HandleInputs()
     {
         // Get movement input
         Vector2 movementInput = playerControls.Movement.Move.ReadValue<Vector2>();
         Vector3 movement = new Vector3(movementInput.x, 0f, movementInput.y);
+
         // Get direction of movement relative to player rotation
-        Vector3 movementDirection = transform.TransformDirection(movement).normalized;
+        movementDirection = transform.TransformDirection(movement).normalized;
+        movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, surfaceNormal).normalized;
     
         // Get input for skiing, jumping, and down jetting
-        bool isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f || skiToggle;
-        bool isUpJetting = isSkiing && playerControls.Movement.JumpJet.ReadValue<float>() > 0.0f;
-        bool isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
-        bool isJetting = isUpJetting || isDownJetting;
-        bool isMoving = movement.magnitude > 0.0f;
-        bool isGrounded = false;
+        isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f || skiToggle;
+        isUpJetting = isSkiing && playerControls.Movement.JumpJet.ReadValue<float>() > 0.0f;
+        isDownJetting = playerControls.Movement.DownJet.ReadValue<float>() > 0.0f && isSkiing;
+        isJetting = isUpJetting || isDownJetting;
+        isMoving = movement.magnitude > 0.0f;
 
+        isRunning = isGrounded && isMoving && !isSkiing;
+        
         playerTelemetry.movementDirection = movementDirection;
         playerTelemetry.isSkiing = isSkiing;
         playerTelemetry.isUpJetting = isUpJetting;
         playerTelemetry.isDownJetting = isDownJetting;
 
-        // Set friction based on whether player is skiing or not
-        playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
+        // Set animator values
+        Vector3 animMovementDirectionNewY = Vector3.up * (isDownJetting ? -1f : (isUpJetting ? 1f : 0f));
+        animMovementDirection = Vector3.Lerp(animMovementDirection, movement.normalized + animMovementDirectionNewY, Time.fixedDeltaTime * 10f);
+        animator.SetFloat("xDir", animMovementDirection.x);
+        animator.SetFloat("yDir", animMovementDirection.y);
+        animator.SetFloat("zDir", animMovementDirection.z);
+        animator.SetFloat("yVel", rb.velocity.normalized.y);
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isRunning", isRunning);
+        animator.SetBool("isSkiing", isSkiing && (!isUpJetting && !isDownJetting));
+        animator.SetBool("isJetting", isUpJetting || isDownJetting);
+    }
 
+    private void HandleCollision()
+    {
         // Get terrain points from terrain detector
         List<ContactPoint> terrainContactPoints = terrainDetector.GetTerrainContactPoints();
-
-        Vector3 playerPositionCenter = playerCollider.bounds.center;
         
-        Vector3 surfaceNormal = Vector3.up;
-        Vector3 surfacePoint = Vector3.zero;
+        isGrounded = false;
+        surfaceNormal = Vector3.up;
+        surfacePoint = Vector3.zero;
 
-        float distanceToSurface = Mathf.Infinity;
+        distanceToSurface = Mathf.Infinity;
 
         float surfaceDetectionResolution = 15f;
 
@@ -353,8 +400,8 @@ public class PlayerController : MonoBehaviour
 
             // Do a bunch of raycasts at player height intervals to get a more accurate surface normal and distance to surface
             float playerHeight = playerCollider.bounds.size.y;
-            Vector3 playerBottom = playerPositionCenter - Vector3.up * playerHeight / 2.0f;
-            Vector3 playerTop = playerPositionCenter + Vector3.up * playerHeight / 2.0f;
+            Vector3 playerBottom = rb.position - Vector3.up * playerHeight / 2.0f;
+            Vector3 playerTop = rb.position + Vector3.up * playerHeight / 2.0f;
             Vector3 checkDirection = -surfaceNormal;
 
             for (i = 0; i < surfaceDetectionResolution; i++)
@@ -392,7 +439,7 @@ public class PlayerController : MonoBehaviour
             RaycastHit hit;
             bool didHit = Physics.Raycast(
                 new Ray(
-                    playerPositionCenter,
+                    rb.position,
                     -lastKnownSurfaceNormal
                 ),
                 out hit,
@@ -426,51 +473,22 @@ public class PlayerController : MonoBehaviour
         playerTelemetry.isGrounded = isGrounded;
         playerTelemetry.surfacePoint = surfacePoint;
         playerTelemetry.surfaceNormal = surfaceNormal;
-
-        bool isRunning = isGrounded && isMoving && !isSkiing;
-
-
-        // Apply Drag
-        float chosenDrag = 0.0f;
-        if (distanceToSurface <= airCushionHeight)
-        {
-            chosenDrag = airCushionDrag;
-        }
-        else
-        {
-            chosenDrag = drag;
-        }
-        rb.drag = chosenDrag;
-
-        Vector3 movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, surfaceNormal).normalized;
+    }
 
 
-        // Set animator values
-        Vector3 animMovementDirectionNewY = Vector3.up * (isDownJetting ? -1f : (isUpJetting ? 1f : 0f));
-        animMovementDirection = Vector3.Lerp(animMovementDirection, movement.normalized + animMovementDirectionNewY, Time.fixedDeltaTime * 10f);
-        animator.SetFloat("xDir", animMovementDirection.x);
-        animator.SetFloat("yDir", animMovementDirection.y);
-        animator.SetFloat("zDir", animMovementDirection.z);
-        animator.SetFloat("yVel", rb.velocity.normalized.y);
-        animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isRunning", isRunning);
-        animator.SetBool("isSkiing", isSkiing && (!isUpJetting && !isDownJetting));
-        animator.SetBool("isJetting", isUpJetting || isDownJetting);
-
-
+    private void HandleMovement()
+    {
         // Skiing Movement
         if (isSkiing)
         {
             // Hovering
+            Vector3 hoverForce = Vector3.zero;
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
             float baseForce = Physics.gravity.magnitude * hoverFactor;
 
-            Vector3 lateralMovementDirection = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
-            Vector3 lateralSurfaceDirection = Vector3.ProjectOnPlane(surfaceNormal, Vector3.up).normalized;
-            float slopeDirection = Vector3.Dot(lateralMovementDirection, lateralSurfaceDirection);
-
-
-            Vector3 hoverForce = Vector3.zero;
+            Vector3 lateralMovementDirection = Vector3.ProjectOnPlane(rb.velocity.normalized, Vector3.up);
+            Vector3 lateralSurfaceDirection = Vector3.ProjectOnPlane(surfaceNormal, Vector3.up);
+            float slopeDirection = Vector3.Dot(lateralSurfaceDirection, lateralMovementDirection);
 
             // Constant "up" force
             hoverForce.y = baseForce;
@@ -486,15 +504,23 @@ public class PlayerController : MonoBehaviour
             else
             {
                 // Adjusts the surface normal depending on how steep the slope is, steeper slopes make the normal more vertical
-                Vector3 adjustedSurfaceNormal = surfaceNormal - lateralMovementDirection * slopeDirection;
+                Vector3 adjustedSurfaceNormal = (surfaceNormal - lateralMovementDirection * slopeDirection).normalized;
 
-                Vector3 latMoveDirOrUp = lateralMovementDirection.magnitude > 0.0f ? lateralMovementDirection : Vector3.up;
+                Vector3 latMoveDirOrUp = lateralMovementDirection.magnitude > 0.0f ? lateralMovementDirection.normalized : Vector3.up;
                 float negVelocityDirOrUpDotSurfaceNormal = Vector3.Dot(-latMoveDirOrUp, adjustedSurfaceNormal);
 
                 // Half as much force in the direction of the slope
                 hoverForce.x = (adjustedSurfaceNormal.x + latMoveDirOrUp.x * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
                 hoverForce.z = (adjustedSurfaceNormal.z + latMoveDirOrUp.z * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
+
+                Debug.DrawRay(rb.position, adjustedSurfaceNormal, Color.blue, 10.0f);
+                Debug.DrawRay(rb.position, latMoveDirOrUp, Color.green, 10.0f);
+                Debug.DrawRay(rb.position, adjustedSurfaceNormal + Vector3.ProjectOnPlane(latMoveDirOrUp * negVelocityDirOrUpDotSurfaceNormal, Vector3.up), Color.yellow, 10.0f);
             }
+
+            Debug.DrawRay(rb.position, surfaceNormal, Color.red, 10.0f);
+            // print(rb.velocity.magnitude);
+            // print(slopeDirection > 0.0f ? "Going downhill" : "Going uphill");
 
             rb.AddForce(hoverForce, ForceMode.Acceleration);
 
@@ -515,6 +541,7 @@ public class PlayerController : MonoBehaviour
             if (isUpJetting)jetForce += Vector3.up * upJetStrength * verticalJetResistMultiplier;
             if (isDownJetting) jetForce += -Vector3.up * downJetStrength * verticalJetResistMultiplier;
 
+            // print(jetForce);
             rb.AddForce(jetForce, ForceMode.Acceleration);
         }
 
@@ -551,7 +578,12 @@ public class PlayerController : MonoBehaviour
         Vector3 rotation = new Vector3(0f, rotationInput.x, 0f);
         rotation *= horizontalRotationSpeed * Time.fixedDeltaTime;
         rotation = Vector3.ClampMagnitude(rotation, horizontalRotationLimit);
-        transform.Rotate(rotation);
+
+        Quaternion newRot = Quaternion.Euler(rb.rotation.eulerAngles + rotation);
+
+        // TODO: change this to rotate by rigidbody 
+        rb.MoveRotation(newRot);
+        // transform.Rotate(rotation);
     }
 
     private void InitializePauseMenuElements()

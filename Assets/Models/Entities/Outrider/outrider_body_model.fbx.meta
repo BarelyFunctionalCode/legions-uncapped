@@ -458,7 +458,7 @@ ModelImporter:
       name: jump_start
       takeName: Armature|Action
       internalID: 0
-      firstFrame: 499
+      firstFrame: 505
       lastFrame: 520
       wrapMode: 0
       orientationOffsetY: 0
