@@ -204,7 +204,7 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: 7071712746093724db10837ea75b71da, type: 3}
   m_Controller: {fileID: 9100000, guid: 17dbff02b949b5d4485889013d76e29f, type: 2}
   m_CullingMode: 1
-  m_UpdateMode: 0
+  m_UpdateMode: 1
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
@@ -259,10 +259,10 @@ MonoBehaviour:
   verticalRotationLimit: 100
   skiMaterial: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
   normalMaterial: {fileID: 13400000, guid: 3c46edcb0e00fb14d9c600ca066c4007, type: 2}
-  hoverHeightMax: 0.2
-  skiStrength: 25
-  resistSkiSpeed: 80
-  maxSkiSpeed: 200
+  hoverHeightMax: 0.02
+  skiStrength: 30
+  resistSkiSpeed: 20
+  maxSkiSpeed: 40
   upJetStrength: 50
   resistUpJetSpeed: 80
   maxUpJetSpeed: 150
@@ -494,7 +494,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2881643894341902283}
   m_LocalRotation: {x: -0.00000012200323, y: -0.00000029429788, z: -0.00000032782546, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0.551}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3286854195316177110}
@@ -2193,7 +2193,7 @@ Rigidbody:
   m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 2
 --- !u!136 &3129847466862892098
@@ -2203,7 +2203,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8503418269387181118}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 2.5
@@ -2449,7 +2449,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2783671893088172364, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.4642857
+      value: 0.5442857
       objectReference: {fileID: 0}
     - target: {fileID: 6326917923737369003, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2465,11 +2465,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8619172520681338907, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.4642857
+      value: 0.5442857
       objectReference: {fileID: 0}
     - target: {fileID: 8676863184438329634, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.4642857
+      value: 0.5442857
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
