@@ -1164,18 +1164,6 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2104618479208652438, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: hoverHeightMax
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129847466862892098, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
-    - target: {fileID: 4750743439751955439, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: m_Interpolate
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4816535711594619940, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_RootOrder
       value: 11
@@ -1224,10 +1212,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5248141138229305080, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: m_UpdateMode
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5715229528086665537, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1250,14 +1234,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877114577312309488, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8503418269387181118, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8855182427708684867, guid: dbcdb3bc12430f144b6b4448191b4b5c, type: 3}
-      propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

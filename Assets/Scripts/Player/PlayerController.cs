@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -139,19 +140,19 @@ public class PlayerController : MonoBehaviour
 
     [Header("Hovering")]
     [Range(0.0f, 2.0f)]
-    [SerializeField] private float hoverHeightMax = 0.2f;
+    [SerializeField] private float hoverHeightMax = 0.5f;
 
     [Header("Skiing")]
     // public static float skiStrengthMin = 0f;
     // public static float skiStrengthMax = 300f;
     [PauseMenuDevOption("Ski Force", 0f, 300f)]
-    [SerializeField] public float skiStrength = 40f;
+    [SerializeField] public float skiStrength = 30f;
 
     [PauseMenuDevOption("Skiing Resist Speed", 0f, 300f)]
-    [SerializeField] public float resistSkiSpeed = 40f;
+    [SerializeField] public float resistSkiSpeed = 20f;
 
     [PauseMenuDevOption("Skiing Max Speed", 0f, 300f)]
-    [SerializeField] public float maxSkiSpeed = 120f;
+    [SerializeField] public float maxSkiSpeed = 40f;
 
 
     [Header("Jetting")]
@@ -231,6 +232,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform throwableMountPoint;
 
     private PlayerLoadout playerLoadout;
+
+    private bool test_PlayerCollided = false;
 
     void Awake()
     {
@@ -383,6 +386,7 @@ public class PlayerController : MonoBehaviour
         // Calculate terrain data from collision points
         if (terrainContactPoints.Count > 0)
         {
+            test_PlayerCollided = true;
 
             // Get average surface normal and point from all contact points
             surfaceNormal = Vector3.zero;
@@ -482,48 +486,23 @@ public class PlayerController : MonoBehaviour
         if (isSkiing)
         {
             // Hovering
-            Vector3 hoverForce = Vector3.zero;
+            // More force the closer to the surface...
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
-            float baseForce = Physics.gravity.magnitude * hoverFactor;
 
-            Vector3 lateralMovementDirection = Vector3.ProjectOnPlane(rb.velocity.normalized, Vector3.up);
-            Vector3 lateralSurfaceDirection = Vector3.ProjectOnPlane(surfaceNormal, Vector3.up);
-            float slopeDirection = Vector3.Dot(lateralSurfaceDirection, lateralMovementDirection);
-
-            // Constant "up" force
-            hoverForce.y = baseForce;
-
-            // Going downhill
-            if (slopeDirection > 0.0f)
+            if (distanceToSurface < hoverHeightMax)
             {
-                // Twice as much force in the direction of the slope
-                hoverForce.x = surfaceNormal.x * 2.0f * baseForce;
-                hoverForce.z = surfaceNormal.z * 2.0f * baseForce;
+                // Constant up force to oppose gravity
+                rb.AddForce(Vector3.up * Physics.gravity.magnitude * hoverFactor, ForceMode.Acceleration);
+
+                // Apply force to keep player off surface
+                Vector3 lateralVelocity = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
+                float lateralDirDotSurfaceNormal = Vector3.Dot(lateralVelocity.normalized, surfaceNormal);
+                Vector3 velocityOnSurfaceNormal = Vector3.Project(rb.velocity, -surfaceNormal);
+
+                Vector3 adjustedVelocity = -velocityOnSurfaceNormal + lateralVelocity * lateralDirDotSurfaceNormal;
+                if (Vector3.Dot(rb.velocity.normalized, surfaceNormal) < 0.0f)
+                    rb.AddForce(adjustedVelocity * hoverFactor, ForceMode.VelocityChange);
             }
-            // Going uphill
-            else
-            {
-                // Adjusts the surface normal depending on how steep the slope is, steeper slopes make the normal more vertical
-                Vector3 adjustedSurfaceNormal = (surfaceNormal - lateralMovementDirection * slopeDirection).normalized;
-
-                Vector3 latMoveDirOrUp = lateralMovementDirection.magnitude > 0.0f ? lateralMovementDirection.normalized : Vector3.up;
-                float negVelocityDirOrUpDotSurfaceNormal = Vector3.Dot(-latMoveDirOrUp, adjustedSurfaceNormal);
-
-                // Half as much force in the direction of the slope
-                hoverForce.x = (adjustedSurfaceNormal.x + latMoveDirOrUp.x * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
-                hoverForce.z = (adjustedSurfaceNormal.z + latMoveDirOrUp.z * negVelocityDirOrUpDotSurfaceNormal) * 0.5f * baseForce;
-
-                Debug.DrawRay(rb.position, adjustedSurfaceNormal, Color.blue, 10.0f);
-                Debug.DrawRay(rb.position, latMoveDirOrUp, Color.green, 10.0f);
-                Debug.DrawRay(rb.position, adjustedSurfaceNormal + Vector3.ProjectOnPlane(latMoveDirOrUp * negVelocityDirOrUpDotSurfaceNormal, Vector3.up), Color.yellow, 10.0f);
-            }
-
-            Debug.DrawRay(rb.position, surfaceNormal, Color.red, 10.0f);
-            // print(rb.velocity.magnitude);
-            // print(slopeDirection > 0.0f ? "Going downhill" : "Going uphill");
-
-            rb.AddForce(hoverForce, ForceMode.Acceleration);
-
 
             // Jetting Force
             Vector3 jetForce = Vector3.zero;
