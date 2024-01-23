@@ -106,9 +106,10 @@ public class PlayerTelemetry
 }
 
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Entity
 {
     [SerializeField] private DevVectorRenderer devVectorRenderer;
+    [SerializeField] private HUD hud;
 
     public PlayerTelemetry playerTelemetry;
 
@@ -175,6 +176,9 @@ public class PlayerController : MonoBehaviour
     [PauseMenuDevOption("Down Jeting Max Speed", 0f, 300f)]
     [SerializeField] public float maxDownJetSpeed = 120f;
 
+    [PauseMenuDevOption("Jetting Energy Drain", 0f, 100f)]
+    [SerializeField] public float jettingEnergyDrain = 20f;
+
     [Header("Running")]
     [PauseMenuDevOption("Run Force", 0f, 50f)]
     [SerializeField] public float runStrength = 40f;
@@ -235,8 +239,10 @@ public class PlayerController : MonoBehaviour
 
     private bool test_PlayerCollided = false;
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         playerTelemetry = new PlayerTelemetry(devVectorRenderer);
 
         playerControls = new PlayerControls();
@@ -249,6 +255,7 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         playerLoadout = GetComponent<PlayerLoadout>();
         playerLoadout.Initialize(this, weaponMountPoint, throwableMountPoint);
+        hud.Initialize(this);
     }
 
     void Start()
@@ -281,8 +288,10 @@ public class PlayerController : MonoBehaviour
         isJumping = true;
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+
         HandleInputs();
 
         bool tempSkiToggleInput = playerControls.Movement.ToggleSki.ReadValue<float>() > 0.0f;
@@ -483,23 +492,23 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         // Skiing Movement
-        if (isSkiing)
+        if (isSkiing && GetEnergy() > 0.1f)
         {
             // Hovering
             // More force the closer to the surface...
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
 
-            if (distanceToSurface < hoverHeightMax)
-            {
-                // Constant up force to oppose gravity
-                rb.AddForce(Vector3.up * Physics.gravity.magnitude * hoverFactor, ForceMode.Acceleration);
+            // Constant up force to oppose gravity
+            rb.AddForce(Vector3.up * Physics.gravity.magnitude * hoverFactor, ForceMode.Acceleration);
 
+            if (distanceToSurface < hoverHeightMax * 0.5f)
+            {
                 // Apply force to keep player off surface
                 Vector3 lateralVelocity = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
                 float lateralDirDotSurfaceNormal = Vector3.Dot(lateralVelocity.normalized, surfaceNormal);
-                Vector3 velocityOnSurfaceNormal = Vector3.Project(rb.velocity, -surfaceNormal);
+                Vector3 velocityIntoSurface = Vector3.Project(rb.velocity, -surfaceNormal);
 
-                Vector3 adjustedVelocity = -velocityOnSurfaceNormal + lateralVelocity * lateralDirDotSurfaceNormal;
+                Vector3 adjustedVelocity = -velocityIntoSurface + lateralVelocity * lateralDirDotSurfaceNormal;
                 if (Vector3.Dot(rb.velocity.normalized, surfaceNormal) < 0.0f)
                     rb.AddForce(adjustedVelocity * hoverFactor, ForceMode.VelocityChange);
             }
@@ -517,8 +526,10 @@ public class PlayerController : MonoBehaviour
             float verticalResistSpeed = currentUpSpeed > 0.0f ? resistUpJetSpeed : resistDownJetSpeed;
             float verticalMaxSpeed = currentUpSpeed > 0.0f ? maxUpJetSpeed : maxDownJetSpeed;
             float verticalJetResistMultiplier = Mathf.Max(1.0f - ((currentUpSpeed - verticalResistSpeed) / (verticalMaxSpeed - verticalResistSpeed)), 0.0f);
-            if (isUpJetting)jetForce += Vector3.up * upJetStrength * verticalJetResistMultiplier;
+            if (isUpJetting) jetForce += Vector3.up * upJetStrength * verticalJetResistMultiplier;
             if (isDownJetting) jetForce += -Vector3.up * downJetStrength * verticalJetResistMultiplier;
+
+            if (isJetting) ApplyEnergyDelta(-jettingEnergyDrain * Time.fixedDeltaTime);
 
             // print(jetForce);
             rb.AddForce(jetForce, ForceMode.Acceleration);
@@ -560,9 +571,7 @@ public class PlayerController : MonoBehaviour
 
         Quaternion newRot = Quaternion.Euler(rb.rotation.eulerAngles + rotation);
 
-        // TODO: change this to rotate by rigidbody 
         rb.MoveRotation(newRot);
-        // transform.Rotate(rotation);
     }
 
     private void InitializePauseMenuElements()
@@ -615,5 +624,10 @@ public class PlayerController : MonoBehaviour
                 );
             }
         }
+    }
+
+    protected override void OnDie()
+    {
+        print("Player Died");
     }
 }
