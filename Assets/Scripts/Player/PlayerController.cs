@@ -1,15 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerTelemetry
 {
-    [PauseMenuDevOption("Raw Collision Data")]
-    public bool enableRawCollisionDebug = false;
-
     [PauseMenuDevOption("Surface Data")]
     public bool enableSurfaceDebug = false;
 
@@ -24,14 +19,10 @@ public class PlayerTelemetry
 
     public Vector3 movementDirection;
 
-    public List<Vector3> rawCollisionPoints;
-    public List<Vector3> rawCollisionDirections;
-    public List<Vector3> surfaceQueryPoints;
-    public List<Vector3> surfaceQueryDirections;
     public Vector3 surfaceNormal;
     public Vector3 surfacePoint;
-
-
+    public float distanceToSurface;
+    
     public bool isSkiing;
     public bool isUpJetting;
     public bool isDownJetting;
@@ -43,12 +34,9 @@ public class PlayerTelemetry
         this.position = Vector3.zero;
         this.velocity = Vector3.zero;
         this.movementDirection = Vector3.zero;
-        this.rawCollisionPoints = new List<Vector3>();
-        this.rawCollisionDirections = new List<Vector3>();
-        this.surfaceQueryPoints = new List<Vector3>();
-        this.surfaceQueryDirections = new List<Vector3>();
         this.surfaceNormal = Vector3.zero;
         this.surfacePoint = Vector3.zero;
+        this.distanceToSurface = 0.0f;
         this.isSkiing = false;
         this.isUpJetting = false;
         this.isDownJetting = false;
@@ -57,26 +45,12 @@ public class PlayerTelemetry
 
     public void Update()
     {
-
-        if (enableRawCollisionDebug)
-        {
-            for (int i = 0; i < rawCollisionPoints.Count; i++)
-            {
-                devVectorRenderer.AddDevVector(rawCollisionPoints[i], rawCollisionDirections[i], Color.Lerp(Color.red, Color.green, ((float)i / (float)rawCollisionPoints.Count)), 5.0f);
-            }
-
-            for (int i = 0; i < surfaceQueryPoints.Count; i++)
-            {
-                devVectorRenderer.AddDevVector(surfaceQueryPoints[i], surfaceQueryDirections[i], Color.Lerp(Color.red, Color.green, ((float)i / (float)surfaceQueryPoints.Count)), 1.0f);
-            }
-        }
-
         if (enableSurfaceDebug)
         {
             devVectorRenderer.AddDevVector(surfacePoint, surfaceNormal * 0.5f, new Color(0f, 1f, 0f, 0.2f), 5.0f, 0.1f);
 
             DebugWidgetManager.Instance.SetDebugText("Terrain Surface",
-            $"Point: {surfacePoint.ToString("F2")}\nNormal: {surfaceNormal.ToString("F2")}",
+            $"Point: {surfacePoint:F2}\nNormal: {surfaceNormal:F2}\nDistance: {distanceToSurface:F2}",
             100, -200);
         }
         else
@@ -89,19 +63,13 @@ public class PlayerTelemetry
             devVectorRenderer.AddDevVector(position, velocity.normalized, Color.blue, 5.0f);
 
             DebugWidgetManager.Instance.SetDebugText("Velocity",
-            $"Speed: {velocity.magnitude.ToString("F2")}\nDirection: {velocity.normalized.ToString("F0")}\nDesired Direction: {movementDirection.ToString("F0")}\nIs Grounded: {isGrounded}\nIs Skiing: {isSkiing}\nIs Up Jetting: {isUpJetting}\nIs Down Jetting: {isDownJetting}",
+            $"Speed: {velocity.magnitude:F2}\nDirection: {velocity.normalized:F0}\nDesired Direction: {movementDirection:F0}\nIs Grounded: {isGrounded}\nIs Skiing: {isSkiing}\nIs Up Jetting: {isUpJetting}\nIs Down Jetting: {isDownJetting}",
             100, -300);
         }
         else
         {
             DebugWidgetManager.Instance.RemoveDebugText("Velocity");
         }
-
-        // Clear all the lists
-        rawCollisionPoints.Clear();
-        rawCollisionDirections.Clear();
-        surfaceQueryPoints.Clear();
-        surfaceQueryDirections.Clear();
     }
 }
 
@@ -113,15 +81,14 @@ public class PlayerController : Entity
 
     public PlayerTelemetry playerTelemetry;
 
-    private float drag = 0.004f;                        
-    private float airCushionDrag = 0.00275f;             
-    private float airCushionHeight = 10f;    
-    // private float maxRunUpSurfaceAngle = 50f; 
-    private float mass = 75f;
+    private readonly float drag = 0.004f;                        
+    private readonly float airCushionDrag = 0.00275f;             
+    private readonly float airCushionHeight = 10f;    
+    private readonly float mass = 75f;
 
     [PauseMenuOption("Horizontal Look", 0f, 100f)]
     public float horizontalRotationSpeed = 20f;
-    private float horizontalRotationLimit = 100f;
+    private readonly float horizontalRotationLimit = 100f;
 
     [PauseMenuOption("Vertical Look", 0f, 100f)]
     public float verticalRotationSpeed = 60f;
@@ -134,18 +101,15 @@ public class PlayerController : Entity
     public PlayerControls playerControls;
     private Rigidbody rb;
     private CapsuleCollider playerCollider;
-    private TerrainDetector terrainDetector;
     private Animator animator;
     private Vector3 animMovementDirection = Vector3.zero;
 
 
     [Header("Hovering")]
     [Range(0.0f, 2.0f)]
-    [SerializeField] private float hoverHeightMax = 0.5f;
+    [SerializeField] private float hoverHeightMax = 0.02f;
 
     [Header("Skiing")]
-    // public static float skiStrengthMin = 0f;
-    // public static float skiStrengthMax = 300f;
     [PauseMenuDevOption("Ski Force", 0f, 300f)]
     [SerializeField] public float skiStrength = 30f;
 
@@ -203,9 +167,6 @@ public class PlayerController : Entity
     [PauseMenuDevOption("Air Control Max Speed", 0f, 50f)]
     [SerializeField] public float maxAirControlSpeed = 20f;
 
-    private Vector3 lastKnownSurfaceNormal = Vector3.zero;
-    private Vector3 lastKnownSurfacePoint = Vector3.zero;
-
     [Header("Collision Detection")]
     [SerializeField] private LayerMask ignoreLayers;
 
@@ -214,7 +175,6 @@ public class PlayerController : Entity
     bool skiToggle = false;
 
     Vector3 movementDirection = Vector3.zero;
-    Vector3 movementDirectionAdjusted = Vector3.zero;
     bool isJumping = false;
     bool isSkiing = false;
     bool isUpJetting = false;
@@ -237,8 +197,6 @@ public class PlayerController : Entity
 
     private PlayerLoadout playerLoadout;
 
-    private bool test_PlayerCollided = false;
-
     protected override void Awake()
     {
         base.Awake();
@@ -251,7 +209,6 @@ public class PlayerController : Entity
         rb.mass = mass;
         playerCollider = GetComponent<CapsuleCollider>();
         playerCollider.material = normalMaterial;
-        terrainDetector = transform.parent.GetComponentInChildren<TerrainDetector>();
         animator = GetComponent<Animator>();
         playerLoadout = GetComponent<PlayerLoadout>();
         playerLoadout.Initialize(this, weaponMountPoint, throwableMountPoint);
@@ -292,6 +249,7 @@ public class PlayerController : Entity
     {
         base.Update();
 
+        HandleCollision();
         HandleInputs();
 
         bool tempSkiToggleInput = playerControls.Movement.ToggleSki.ReadValue<float>() > 0.0f;
@@ -320,21 +278,11 @@ public class PlayerController : Entity
         playerCollider.material = isSkiing ? skiMaterial : normalMaterial;
 
         // Apply Drag
-        float chosenDrag = 0.0f;
-        if (distanceToSurface <= airCushionHeight)
-        {
-            chosenDrag = airCushionDrag;
-        }
-        else
-        {
-            chosenDrag = drag;
-        }
-        rb.drag = chosenDrag;
+        rb.drag = distanceToSurface <= airCushionHeight ? airCushionDrag : drag;
     }
 
     void FixedUpdate()
     {
-        HandleCollision();
         HandleMovement();
 
         if (hasFocus) HandleRotation();
@@ -350,7 +298,6 @@ public class PlayerController : Entity
 
         // Get direction of movement relative to player rotation
         movementDirection = transform.TransformDirection(movement).normalized;
-        movementDirectionAdjusted = Vector3.ProjectOnPlane(movementDirection, surfaceNormal).normalized;
     
         // Get input for skiing, jumping, and down jetting
         isSkiing = playerControls.Movement.Ski.ReadValue<float>() > 0.0f || skiToggle;
@@ -375,100 +322,34 @@ public class PlayerController : Entity
         animator.SetFloat("yVel", rb.velocity.normalized.y);
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isRunning", isRunning);
-        animator.SetBool("isSkiing", isSkiing && (!isUpJetting && !isDownJetting));
+        animator.SetBool("isSkiing", isSkiing && !isUpJetting && !isDownJetting);
         animator.SetBool("isJetting", isUpJetting || isDownJetting);
     }
 
     private void HandleCollision()
     {
-        // Get terrain points from terrain detector
-        List<ContactPoint> terrainContactPoints = terrainDetector.GetTerrainContactPoints();
-        
         isGrounded = false;
-        surfaceNormal = Vector3.up;
-        surfacePoint = Vector3.zero;
-
         distanceToSurface = Mathf.Infinity;
 
-        float surfaceDetectionResolution = 15f;
-
-        // Calculate terrain data from collision points
-        if (terrainContactPoints.Count > 0)
+        // Raycast to last known ground location
+        Vector3 groundCheckPoint = rb.position + (Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized * 0.5f) + (Vector3.up * playerCollider.bounds.extents.y);
+        RaycastHit hit;
+        bool didHit = Physics.Raycast(
+            new Ray(
+                groundCheckPoint,
+                Vector3.down
+            ),
+            out hit,
+            Mathf.Infinity,
+            ~ignoreLayers
+        );
+        if (didHit)
         {
-            test_PlayerCollided = true;
+            surfaceNormal = hit.normal;
+            surfacePoint = hit.point;
 
-            // Get average surface normal and point from all contact points
-            surfaceNormal = Vector3.zero;
-            int i = 0;
-            foreach (ContactPoint contact in terrainContactPoints)
-            {
-                playerTelemetry.rawCollisionPoints.Add(contact.point - contact.normal * contact.separation);
-                playerTelemetry.rawCollisionDirections.Add(contact.normal);
-                surfaceNormal += contact.normal;
-                surfacePoint += (contact.point - contact.normal * contact.separation);
-                i++;
-            }
-            surfaceNormal /= terrainContactPoints.Count;
-            surfacePoint /= terrainContactPoints.Count;
-
-            // Do a bunch of raycasts at player height intervals to get a more accurate surface normal and distance to surface
-            float playerHeight = playerCollider.bounds.size.y;
-            Vector3 playerBottom = rb.position - Vector3.up * playerHeight / 2.0f;
-            Vector3 playerTop = rb.position + Vector3.up * playerHeight / 2.0f;
-            Vector3 checkDirection = -surfaceNormal;
-
-            for (i = 0; i < surfaceDetectionResolution; i++)
-            {
-                Vector3 playerHeightPoint = Vector3.Lerp(playerTop, playerBottom, (float)i / (float)surfaceDetectionResolution);
-                RaycastHit hit;
-                bool didHit = Physics.Raycast(
-                    new Ray(
-                        playerHeightPoint,
-                        checkDirection
-                    ),
-                    out hit,
-                    Mathf.Infinity,
-                    ~ignoreLayers
-                );
-                if (didHit)
-                {
-                    playerTelemetry.surfaceQueryPoints.Add(hit.point);
-                    playerTelemetry.surfaceQueryDirections.Add(hit.normal);
-
-                    float hitDistance = Vector3.Distance(hit.point, playerCollider.ClosestPoint(hit.point));
-                    if (hitDistance < distanceToSurface)
-                    {
-                        surfaceNormal = hit.normal;
-                        surfacePoint = hit.point;
-                        distanceToSurface = hitDistance;
-                    }
-                }
-            }
-        }
-        // Fall back to raycasting if no collision points
-        else
-        {
-            // Raycast to last known ground location
-            RaycastHit hit;
-            bool didHit = Physics.Raycast(
-                new Ray(
-                    rb.position,
-                    -lastKnownSurfaceNormal
-                ),
-                out hit,
-                Mathf.Infinity,
-                ~ignoreLayers
-            );
-            if (didHit)
-            {
-                surfaceNormal = hit.normal;
-                surfacePoint = hit.point;
-
-                distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, playerCollider.ClosestPoint(surfacePoint)), 0.0f);
-
-                playerTelemetry.rawCollisionPoints.Add(hit.point);
-                playerTelemetry.rawCollisionDirections.Add(hit.normal);
-            }
+            // Artificially increase distance to surface by 0.5f to prevent player from being grounded when they shouldn't be
+            distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, groundCheckPoint - (Vector3.up * playerCollider.bounds.extents.y * 2.0f)) - 0.5f, 0.0f);
         }
 
         if (distanceToSurface < hoverHeightMax * 2.0f)
@@ -476,16 +357,10 @@ public class PlayerController : Entity
             isGrounded = true;
         }
 
-        if (Vector3.Distance(lastKnownSurfaceNormal, surfaceNormal) > 0.00001f)
-        {
-            float surfaceNormalLerpFactor = Mathf.Clamp01((distanceToSurface - 1.0f) / 10.0f);
-            lastKnownSurfaceNormal = Vector3.Lerp(surfaceNormal, Vector3.up, surfaceNormalLerpFactor);
-        }
-        if (Vector3.Distance(lastKnownSurfacePoint, surfacePoint) > 0.00001f) lastKnownSurfacePoint = surfacePoint;
-
         playerTelemetry.isGrounded = isGrounded;
         playerTelemetry.surfacePoint = surfacePoint;
         playerTelemetry.surfaceNormal = surfaceNormal;
+        playerTelemetry.distanceToSurface = distanceToSurface;
     }
 
 
@@ -498,20 +373,45 @@ public class PlayerController : Entity
             // More force the closer to the surface...
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax)/hoverHeightMax) * 1.1f;
 
-            // Constant up force to oppose gravity
-            rb.AddForce(Vector3.up * Physics.gravity.magnitude * hoverFactor, ForceMode.Acceleration);
+            Vector3 lateralVelocityDir = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
+            float surfaceNormalDotLateralVelocityDirection = Vector3.Dot(surfaceNormal, lateralVelocityDir);
 
-            if (distanceToSurface < hoverHeightMax * 0.5f)
+            Vector3 acc = Vector3.zero;
+            // Going Downhill?
+            if (surfaceNormalDotLateralVelocityDirection > 0.0f)
             {
-                // Apply force to keep player off surface
-                Vector3 lateralVelocity = Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized;
-                float lateralDirDotSurfaceNormal = Vector3.Dot(lateralVelocity.normalized, surfaceNormal);
-                Vector3 velocityIntoSurface = Vector3.Project(rb.velocity, -surfaceNormal);
-
-                Vector3 adjustedVelocity = -velocityIntoSurface + lateralVelocity * lateralDirDotSurfaceNormal;
-                if (Vector3.Dot(rb.velocity.normalized, surfaceNormal) < 0.0f)
-                    rb.AddForce(adjustedVelocity * hoverFactor, ForceMode.VelocityChange);
+                // player is pushed fast downhill... easy
+                acc.x = hoverFactor * surfaceNormal.x * Physics.gravity.magnitude * 2.0f;
+                acc.z = hoverFactor * surfaceNormal.z * Physics.gravity.magnitude * 2.0f;
             }
+            // Going Uphill?
+            else
+            {
+                // surfaceNormalDotLateralVelocityDirection is negative
+                // lateralVelocityDir is is obviously pointing into the surface
+                // flip lateralVelocityDir and scale it depending on how steep the surface is
+
+                // On steep surfaces, if player is flying into the surface it's nearly 0,
+                // If going up the surface, its slightly uphill of the surface
+
+                // if the surface is not steep, the player is slightly pushed uphill
+                Vector3 adjustedSurfaceNormal = surfaceNormal - lateralVelocityDir * surfaceNormalDotLateralVelocityDirection;
+
+                Vector3 lateralVelocityDirOrUp = lateralVelocityDir.magnitude > 0.0f ? lateralVelocityDir : Vector3.up;
+
+                // pointing away from surface
+                Vector3 reverseLateralVelocityDir = -lateralVelocityDirOrUp;
+
+                // this would be positive, right?
+                float adjustedSurfaceNormalDotReverseLateralVelocityDir = Vector3.Dot(adjustedSurfaceNormal, reverseLateralVelocityDir);
+
+                // player is pushed away and uphill of surface, seems like it wouldn't work?
+                acc.x = (adjustedSurfaceNormal.x + lateralVelocityDir.x * adjustedSurfaceNormalDotReverseLateralVelocityDir) * hoverFactor * Physics.gravity.magnitude * 0.5f;
+                acc.z = (adjustedSurfaceNormal.z + lateralVelocityDir.z * adjustedSurfaceNormalDotReverseLateralVelocityDir) * hoverFactor * Physics.gravity.magnitude * 0.5f;
+            }
+            acc.y = hoverFactor * Physics.gravity.magnitude;
+            rb.AddForce(acc, ForceMode.Acceleration);
+
 
             // Jetting Force
             Vector3 jetForce = Vector3.zero;
@@ -531,7 +431,6 @@ public class PlayerController : Entity
 
             if (isJetting) ApplyEnergyDelta(-jettingEnergyDrain * Time.fixedDeltaTime);
 
-            // print(jetForce);
             rb.AddForce(jetForce, ForceMode.Acceleration);
         }
 

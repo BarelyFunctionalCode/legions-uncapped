@@ -219,7 +219,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1548913877977669176}
   serializedVersion: 2
-  m_Mass: 0.0000001
+  m_Mass: 85
   m_Drag: 0
   m_AngularDrag: 0
   m_UseGravity: 1
@@ -280,7 +280,7 @@ MonoBehaviour:
   maxAirControlSpeed: 20
   ignoreLayers:
     serializedVersion: 2
-    m_Bits: 72
+    m_Bits: 8
   hasFocus: 0
   playerUI: {fileID: 4816535709842983379}
   weaponMountPoint: {fileID: 3286854195316177110}
@@ -2451,11 +2451,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2783671893088172364, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.5442857
+      value: 0.45285714
       objectReference: {fileID: 0}
     - target: {fileID: 2783671893088172364, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Value
-      value: -0.0000022959932
+      value: -0.00000223105
       objectReference: {fileID: 0}
     - target: {fileID: 2860589503770068737, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2463,7 +2463,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2860589503770068737, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 319.00073
+      value: 383.0009
       objectReference: {fileID: 0}
     - target: {fileID: 4360873144668385828, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2487,7 +2487,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6103240584896052927, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 319.00073
+      value: 383.0009
       objectReference: {fileID: 0}
     - target: {fileID: 6326917923737369003, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2507,7 +2507,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6640154184869750375, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 319.00073
+      value: 383.0009
       objectReference: {fileID: 0}
     - target: {fileID: 7720583076726256101, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2519,19 +2519,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8619172520681338907, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.5442857
+      value: 0.45285714
       objectReference: {fileID: 0}
     - target: {fileID: 8619172520681338907, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Value
-      value: -0.0000022959932
+      value: -0.00000223105
       objectReference: {fileID: 0}
     - target: {fileID: 8676863184438329634, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Size
-      value: 0.5442857
+      value: 0.45285714
       objectReference: {fileID: 0}
     - target: {fileID: 8676863184438329634, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
       propertyPath: m_Value
-      value: -0.0000022959932
+      value: -0.00000223105
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0ab52eef5ee0c7540a8cbb0c08a02f33, type: 3}
