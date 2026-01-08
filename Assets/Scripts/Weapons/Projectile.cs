@@ -41,7 +41,7 @@ public class Projectile : MonoBehaviour
             Impact();
         }
 
-        transform.LookAt(GetComponent<Rigidbody>().position + GetComponent<Rigidbody>().velocity.normalized);
+        transform.LookAt(GetComponent<Rigidbody>().position + GetComponent<Rigidbody>().linearVelocity.normalized);
 
         float currentDisplacement = (GetComponent<Rigidbody>().position - previousPosition).magnitude;
 
@@ -86,7 +86,7 @@ public class Projectile : MonoBehaviour
         this.ownerTransform = ownerTransform;
         this.maxDamage = maxDamage;
 
-        Vector3 intialVelocity = Vector3.Dot(transform.parent.GetComponentInParent<Rigidbody>().velocity, transform.forward) * transform.forward;
+        Vector3 intialVelocity = Vector3.Dot(transform.parent.GetComponentInParent<Rigidbody>().linearVelocity, transform.forward) * transform.forward;
 
         transform.parent = null;
         GetComponent<Rigidbody>().isKinematic = false;

@@ -12,24 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 4
+  version: 10
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Prototype_Scaling_White
-  m_Shader: {fileID: -6465566751694194690, guid: 74686ab863fe0dc4598560e65eb847eb,
-    type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: -6465566751694194690, guid: 74686ab863fe0dc4598560e65eb847eb, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -113,6 +117,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - Vector1_6155CAB: 0.25
     - Vector1_85F6688: 0
@@ -135,6 +140,7 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
@@ -147,10 +153,8 @@ Material:
     m_Colors:
     - Color_1313CB5F: {r: 0.010329823, g: 0.010960094, b: 0.012983031, a: 1}
     - Color_1dfb0a33e5314a98a054db225a533281: {r: 0, g: 0, b: 0, a: 0.2509804}
-    - Color_2d523c9e87ea411c87ba7d7b977b62e7: {r: 0.9473069, g: 0.9473069, b: 0.9473069,
-        a: 0}
-    - Color_3b380d5fcef743cca18450d9ec1195b1: {r: 0.010329823, g: 0.010960094, b: 0.012983031,
-        a: 1}
+    - Color_2d523c9e87ea411c87ba7d7b977b62e7: {r: 0.9473069, g: 0.9473069, b: 0.9473069, a: 0}
+    - Color_3b380d5fcef743cca18450d9ec1195b1: {r: 0.010329823, g: 0.010960094, b: 0.012983031, a: 1}
     - Color_7F5D350D: {r: 0, g: 0, b: 0, a: 0.2509804}
     - Color_BE5A53D8: {r: 0.9473069, g: 0.9473069, b: 0.9473069, a: 0}
     - Vector2_001701b7223d47fbbc85c8202f0e54da: {r: 1, g: 1, b: 0, a: 0}
@@ -161,3 +165,5 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -41,7 +41,7 @@ public class Throwable : MonoBehaviour
             Destroy(gameObject);
         }
 
-        transform.LookAt(transform.position + GetComponent<Rigidbody>().velocity.normalized);
+        transform.LookAt(transform.position + GetComponent<Rigidbody>().linearVelocity.normalized);
 
         float currentDisplacement = (transform.position - previousPosition).magnitude;
 

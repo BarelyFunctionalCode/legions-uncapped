@@ -53,5 +53,5 @@
         "Temp/": true
     },
     "dotnet.preferCSharpExtension": true,
-    "dotnet.defaultSolution": "legions-uncapped.sln"
+    "dotnet.defaultSolution": "legions-uncapped.slnx"
 }

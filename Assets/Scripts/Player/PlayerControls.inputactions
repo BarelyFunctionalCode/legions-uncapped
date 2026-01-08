@@ -95,7 +95,7 @@
                 {
                     "name": "2D Vector",
                     "id": "7830d8a8-f6e0-4b60-b7ae-9c2ea59f2d6f",
-                    "path": "2DVector",
+                    "path": "2DVector(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -172,7 +172,7 @@
                 {
                     "name": "",
                     "id": "07e9e91c-b557-45a1-b8ac-6ea2632e6265",
-                    "path": "<Keyboard>/z",
+                    "path": "<Mouse>/forwardButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
