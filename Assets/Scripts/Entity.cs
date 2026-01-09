@@ -9,9 +9,11 @@ public class Entity : MonoBehaviour
 
     private float energy = 0;
     private float maxEnergy = 33;
-    private float energyRegenRate = 5.0f;
+    private float energyRegenRate = 6.875f;
+    private float groundEnergyRegenRate = 12.5f;
 
     private bool isDead = false;
+    protected bool isGrounded = false;
 
     protected virtual void Awake()
     {
@@ -23,7 +25,7 @@ public class Entity : MonoBehaviour
     {
         if (isDead) return;
 
-        ApplyEnergyDelta(energyRegenRate * Time.deltaTime);
+        ApplyEnergyDelta((isGrounded ? groundEnergyRegenRate : energyRegenRate) * Time.deltaTime);
     }
 
     public float GetHealth() { return health; }
