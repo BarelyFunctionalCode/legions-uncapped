@@ -77,9 +77,11 @@ public class PlayerTelemetry
 
 public class PlayerController : Entity
 {
+    [Space(20)]
     [SerializeField] private DevVectorRenderer devVectorRenderer;
     [SerializeField] private HUD hud;
 
+    
     public PlayerTelemetry playerTelemetry;
 
     private readonly float drag = 0.004f;                        
