@@ -11,7 +11,6 @@ public class PlayerTelemetry
     [PauseMenuDevOption("Movement Data")]
     public bool enableMovementDebug = false;
 
-
     private DevVectorRenderer devVectorRenderer;
 
     public Vector3 position;
