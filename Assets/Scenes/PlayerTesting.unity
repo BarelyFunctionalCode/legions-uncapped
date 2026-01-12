@@ -1299,7 +1299,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1653640386849062014, guid: ed57e6cc7eb1dda49a47992e67ccc8f0, type: 3}
       propertyPath: UpdateMethod
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2685668647377745496, guid: ed57e6cc7eb1dda49a47992e67ccc8f0, type: 3}
       propertyPath: m_AnchoredPosition.x
