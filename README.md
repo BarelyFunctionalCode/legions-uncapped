@@ -1,6 +1,8 @@
 # Legions Uncapped
 Remake of Legions: Overdrive in Unity
 
+[Currently Under Development](https://github.com/users/BarelyFunctionalCode/projects/2/views/1)
+
 ## How to run
 ### Just run the damn game
 Go to the latest release found [here](https://github.com/ArtimosPenguidor/legions-uncapped/releases) and download the zip file. Extract it and run the executable.
@@ -12,4 +14,5 @@ Go to the latest release found [here](https://github.com/ArtimosPenguidor/legion
 4. Open Unity Hub, go to `Projects` and click `Open` and `Add project from disk`. Select the folder of the cloned repo.
 5. Click on the newly created Unity project.
 6. Click the triangle play button at the top of the screen.
+
 
