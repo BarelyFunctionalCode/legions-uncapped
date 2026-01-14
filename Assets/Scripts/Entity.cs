@@ -4,17 +4,23 @@ using UnityEngine;
 
 public class Entity : MonoBehaviour
 {
-    private float health = 0;
-    private float maxHealth = 100;
+    private const float energyRegenRate = 6.875f;
+    private const float groundEnergyRegenRate = 12.5f;
+    
+    [Header("Entity Attributes")]
+    [SerializeField] private float health;
+    [SerializeField] private float maxHealth;
 
-    private float energy = 0;
-    private float maxEnergy = 33;
-    private float energyRegenRate = 6.875f;
-    private float groundEnergyRegenRate = 12.5f;
+    [SerializeField] private float energy = 0.0f;
+    [SerializeField] private float maxEnergy;
+    [Range(0.0f, 2.0f)]
+    [SerializeField] private float energyRegenFactor = 1.0f;
 
     private bool isDead = false;
     protected bool isGrounded = false;
 
+
+    #region Virtual Overrides
     protected virtual void Awake()
     {
         health = maxHealth;
@@ -24,17 +30,24 @@ public class Entity : MonoBehaviour
     protected virtual void Update()
     {
         if (isDead) return;
-
-        ApplyEnergyDelta((isGrounded ? groundEnergyRegenRate : energyRegenRate) * Time.deltaTime);
+		
+        ApplyEnergyDelta((GetIsGrounded() ? groundEnergyRegenRate : energyRegenRate) * energyRegenFactor * Time.deltaTime);
     }
+    #endregion
+    
+    #region Getters
+    public float GetHealth()				{ return health; }
+    public float GetHealthPercentage()	{ return health / maxHealth; }
+    public bool GetIsGrounded() 			{ return isGrounded; }
+    #endregion
+    
 
-    public float GetHealth() { return health; }
-    public float GetHealthPercentage() { return health / maxHealth; }
     public void TakeDamage(float damage)
     {
         ApplyhealthDelta(-damage);
         if (health <= 0) Die();
     }
+    
     public void ApplyhealthDelta(float amount)
     {
         health += amount;

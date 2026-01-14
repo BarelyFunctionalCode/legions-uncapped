@@ -6,18 +6,22 @@ using UnityEngine.InputSystem;
 public class Weapon : MonoBehaviour
 {
     public static List<string> interactionTags = new List<string>() { "Terrain", "Player", "Throwable" };
-    [SerializeField] private LayerMask ignoreLayers;
+    [Header("Visuals")]
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private GameObject modelObj;
     [SerializeField] private GameObject projectilePrefabObj;
     [SerializeField] private Sprite reticleSprite;
     [SerializeField] private WeaponUI weaponUI;
-
+    
+    [Header("Attributes")]
     [SerializeField] private float ammoCount = 10000;
     [SerializeField] private float maxAmmo = 10000;
     [SerializeField] private float damage = 1;
-
     [SerializeField] private float fireRate = 0.05f;
+    
+    [Header("Collision")]
+    [SerializeField] private LayerMask ignoreLayers;
+
     private float fireRateTimer = 0;
 
     [SerializeField] private bool canFire = true;

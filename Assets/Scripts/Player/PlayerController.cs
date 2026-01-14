@@ -11,7 +11,6 @@ public class PlayerTelemetry
     [PauseMenuDevOption("Movement Data")]
     public bool enableMovementDebug = false;
 
-
     private DevVectorRenderer devVectorRenderer;
 
     public Vector3 position;
@@ -77,9 +76,11 @@ public class PlayerTelemetry
 
 public class PlayerController : Entity
 {
+    [Space(20)]
     [SerializeField] private DevVectorRenderer devVectorRenderer;
     [SerializeField] private HUD hud;
 
+    
     public PlayerTelemetry playerTelemetry;
 
     private readonly float drag = 0.004f;                        
@@ -343,7 +344,7 @@ public class PlayerController : Entity
         surfacePoint = Vector3.zero;
 
         // Raycast to last known ground location
-        Vector3 groundCheckPoint = rb.position;
+        Vector3 groundCheckPoint = playerCollider.bounds.center;
         RaycastHit hit;
         bool didHit = Physics.Raycast(
             new Ray(
