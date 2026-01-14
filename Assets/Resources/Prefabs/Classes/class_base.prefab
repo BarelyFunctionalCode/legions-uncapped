@@ -1606,7 +1606,7 @@ Transform:
   m_GameObject: {fileID: 6955372432089693387}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -24.26, y: -0.83, z: -2.31}
+  m_LocalPosition: {x: -24.26, y: 1.11, z: -8.26}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1644,7 +1644,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6955372432089693387}
   serializedVersion: 5
-  m_Mass: 0.0000001
+  m_Mass: 75
   m_LinearDamping: 0
   m_AngularDamping: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1658,7 +1658,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
@@ -1706,11 +1706,11 @@ MonoBehaviour:
   devVectorRenderer: {fileID: 4034910302823530355}
   hud: {fileID: 0}
   horizontalRotationSpeed: 20
-  verticalRotationSpeed: 60
+  verticalRotationSpeed: 24
   verticalRotationLimit: 100
   skiMaterial: {fileID: 13400000, guid: 5d01f8d4ca43e524696e30c3ba230525, type: 2}
   normalMaterial: {fileID: 13400000, guid: 3c46edcb0e00fb14d9c600ca066c4007, type: 2}
-  hoverHeightMax: 0.2
+  hoverHeightMax: 0.4
   upJetForce: 7656.25
   downJetForce: 5625
   jetAirMoveMinSpeed: 5
