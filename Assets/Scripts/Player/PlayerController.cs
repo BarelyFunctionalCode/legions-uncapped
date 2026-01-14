@@ -344,7 +344,7 @@ public class PlayerController : Entity
         surfacePoint = Vector3.zero;
 
         // Raycast to last known ground location
-        Vector3 groundCheckPoint = rb.position;
+        Vector3 groundCheckPoint = playerCollider.bounds.center;
         RaycastHit hit;
         bool didHit = Physics.Raycast(
             new Ray(
