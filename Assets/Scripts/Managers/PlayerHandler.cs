@@ -7,16 +7,15 @@ public class PlayerHandler : MonoBehaviour
     [SerializeField] public List<int> players;
     GameObject spawn_point;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-    	spawn_point = GameObject.Find("SpawnPoint");
-    	
-    	if (spawn_point == null)
-    	{
-    	    return;
-    	}
-    	
+        spawn_point = GameObject.Find("SpawnPoint");
+
+        if (spawn_point == null)
+        {
+            return;
+        }
+
         int player_id = CreatePlayer(spawn_point);
         if (player_id > 0)
         {
