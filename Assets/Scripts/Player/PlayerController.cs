@@ -189,7 +189,7 @@ public class PlayerController : Entity
     bool isJetting = false;
     bool isMoving = false;
     bool isRunning = false;
-    int lastGroundedFrames = 0;
+    float lastGroundedTime = 0;
 
     Vector3 surfaceNormal = Vector3.up;
     Vector3 surfacePoint = Vector3.zero;
@@ -337,7 +337,7 @@ public class PlayerController : Entity
 
     private void HandleCollision()
     {
-        lastGroundedFrames++;
+        lastGroundedTime += Time.deltaTime;
         isGrounded = false;
         distanceToSurface = Mathf.Infinity;
         surfaceNormal = Vector3.up;
@@ -361,7 +361,7 @@ public class PlayerController : Entity
             
             // Surface too steep
             float slope = Vector3.Dot(hit.normal, Vector3.up);
-            if (slope < 0.5f) return;
+            if (slope <= 0.1f) return;
 
             surfacePoint = hit.point;
             distanceToSurface = Mathf.Max(Vector3.Distance(surfacePoint, groundCheckPoint) - playerCollider.bounds.extents.y, 0.0f);
@@ -369,14 +369,14 @@ public class PlayerController : Entity
             playerTelemetry.surfacePoint = surfacePoint;
 
             // Breakaway vertical speed check
-            if (rb.linearVelocity.y > 2.0f) return;
+            if (rb.linearVelocity.y > 20.0f) return;
 
-            if (distanceToSurface <= 0.15f)
+            if (distanceToSurface <= 0.25f)
             {
                 isGrounded = true;
-                lastGroundedFrames = 0;
+                lastGroundedTime = 0f;
             }
-            else if (lastGroundedFrames < 8) // TODO: This should changed to a timer-based check rather than frame-based since it can vary with framerate
+            else if (lastGroundedTime < 0.2f)
             {
                 isGrounded = true;
             }
@@ -420,24 +420,7 @@ public class PlayerController : Entity
             desiredAcc.z += airControlAcc.z;
         }
 
-        // Running Movement
-        if (isRunning)
-        {
-            float slopeDot = Vector3.Dot(currentVelocity, surfaceNormal);
-
-            if (slopeDot < 0.0f)
-                groundImpulse -= surfaceNormal * (slopeDot + 0.002f);
-
-            Vector3 runDirection = movementDirection.normalized;
-            Vector3 sideDirection = Vector3.Cross(runDirection, Vector3.up).normalized;
-            Vector3 forwardDirection = (runDirection - sideDirection * Vector3.Dot(runDirection, sideDirection)).normalized;
-
-            Vector3 targetVelocity = forwardDirection * maxRunSpeed;
-            Vector3 velocityDiff = targetVelocity - (currentVelocity + groundImpulse);
-
-            float maxRunAccel = runForce / mass * Time.fixedDeltaTime;
-            groundImpulse += velocityDiff.normalized * Mathf.Min(velocityDiff.magnitude, maxRunAccel);
-        }
+        
 
         // Jumping
         if (isJumping && isGrounded && currentVelocity.y <= maxJumpSpeed)
@@ -466,7 +449,45 @@ public class PlayerController : Entity
                 surfaceNormal :
                 Vector3.zero;
             desiredVerticalAcc = jumpSurfaceNormal.y * playerScaleFactor * jumpForceFinal * jumpScale;
-            lastGroundedFrames = 8;
+            lastGroundedTime = 1f;
+        }
+        // Running Movement
+        else if (isRunning)
+        {
+            groundImpulse = new(0f, -Physics.gravity.magnitude * Time.fixedDeltaTime, 0f);
+            float slopeDot = -Vector3.Dot(groundImpulse, surfaceNormal);
+
+            if (slopeDot > 0.0f)
+            {
+                float modifiedSlopeDot = slopeDot + 0.002f;
+                groundImpulse.y += surfaceNormal.y * modifiedSlopeDot;
+                groundImpulse.z += surfaceNormal.z * modifiedSlopeDot;
+                if (groundImpulse.magnitude < 0.0f)
+                {
+                    groundImpulse = Vector3.zero;
+                }
+            }
+
+            Vector3 targetVelocity = Vector3.zero;
+            if (movementDirection.magnitude > 0.01f)
+            {
+                Vector3 runDirection = movementDirection;
+                Vector3 forwardDirection = surfaceNormal;
+                Vector3 sideDirection = new(-runDirection.z * runDirection.magnitude, 0f, runDirection.x * runDirection.magnitude);
+                float sideDot = Vector3.Dot(sideDirection, forwardDirection);
+                forwardDirection -= sideDirection * sideDot;
+                float moveDot = Vector3.Dot(runDirection, forwardDirection);
+                runDirection -= forwardDirection * moveDot;
+                targetVelocity = runDirection * (maxRunSpeed / runDirection.magnitude);
+            }
+
+            Vector3 velocityDiff = targetVelocity - (currentVelocity + groundImpulse);
+
+            float maxRunAccel = (runForce / mass) * Time.fixedDeltaTime;
+            if (velocityDiff.magnitude > maxRunAccel)
+                velocityDiff *= maxRunAccel / velocityDiff.magnitude;
+
+            groundImpulse += velocityDiff;
         }
 
         // Skiing Movement
@@ -474,7 +495,6 @@ public class PlayerController : Entity
         {
             // Hovering
             // More force the closer to the surface...
-            // distanceToSurface -= 0.5f; // Artificially decrease distance to surface to make hovering easier
             float hoverFactor = Mathf.Clamp01(1.0f - (distanceToSurface - hoverHeightMax) / hoverHeightMax) * 1.1f;
 
             Vector3 lateralVelocityDir = Vector3.ProjectOnPlane(currentVelocity, Vector3.up).normalized;
