@@ -157,6 +157,7 @@ public class Projectile : MonoBehaviour
     protected void ApplyDamage(GameObject target, float damage)
     {
         // print("Applying " + damage + " damage to " + target.name);
-        if (target.GetComponent<Entity>() != null) target.GetComponent<Entity>().TakeDamage(damage);
+        //if (target.GetComponent<Entity>() != null) target.GetComponent<Entity>().TakeDamage(damage);
+        if (target.GetComponent<IDamageable>() != null) target.GetComponent<IDamageable>().TakeDamage(damage);
     }
 }
